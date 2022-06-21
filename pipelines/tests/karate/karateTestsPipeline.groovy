@@ -3,7 +3,7 @@ package tests.karate
 import org.folio.Constants
 import org.jenkinsci.plugins.workflow.libs.Library
 
-@Library('pipelines-shared-library') _
+@Library('pipelines-shared-library@RANCHER-332') _
 
 def karateEnvironment = "jenkins"
 
