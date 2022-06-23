@@ -6,15 +6,16 @@ import org.jenkinsci.plugins.workflow.libs.Library
 @Library('pipelines-shared-library@RANCHER-332') _
 
 def karateEnvironment = "jenkins"
+def edgeConfiguration
 
 pipeline {
     agent { label 'jenkins-agent-java11' }
 
     parameters {
-        string(name: 'branch', defaultValue: 'master', description: 'Karate tests repository branch to checkout')
-        string(name: 'modules', defaultValue: '', description: 'Comma separated modules list to build(no spaces). Leave empty to launch all.')
+        string(name: 'branch', defaultValue: 'RANCHER-332', description: 'Karate tests repository branch to checkout')
+        string(name: 'modules', defaultValue: 'edge-dematic', description: 'Comma separated modules list to build(no spaces). Leave empty to launch all.')
         string(name: 'threadsCount', defaultValue: '4', description: 'Number of parallel threads')
-        string(name: 'okapiUrl', defaultValue: 'https://folio-testing-karate-okapi.ci.folio.org', description: 'Target environment OKAPI URL')
+        string(name: 'okapiUrl', defaultValue: 'https://folio-testing-cypress-okapi.ci.folio.org', description: 'Target environment OKAPI URL')
         string(name: 'tenant', defaultValue: 'supertenant', description: 'Tenant name for tests execution')
         string(name: 'adminUserName', defaultValue: 'super_admin', description: 'Admin user name')
         password(name: 'adminPassword', defaultValue: 'admin', description: 'Admin user password')
@@ -39,6 +40,13 @@ pipeline {
                         ])
                     }
                 }
+            }
+        }
+
+        stage("Prepare edge modules configuration") {
+            steps {
+                def jsonContents = readJSON file: "edge-configuration.json"
+                karateTestUtils.prepareEdgeModulesConfiguration(edgeConfiguration, params.okapiUrl)
             }
         }
 

@@ -122,7 +122,7 @@ ansiColor('xterm') {
                         loadReference: params.load_reference,
                         loadSample: params.load_sample
                     )
-                    OkapiUser admin_user = okapiSettings.adminUser()
+                    OkapiUser admin_user = okapiSettings.defaultAdminUser()
                     Email email = okapiSettings.email()
                     withCredentials([string(credentialsId: Constants.EBSCO_KB_CREDENTIALS_ID, variable: 'cypress_api_key_apidvcorp'),]) {
                         Deployment deployment = new Deployment(

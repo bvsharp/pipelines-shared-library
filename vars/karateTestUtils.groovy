@@ -2,12 +2,48 @@ import org.folio.Constants
 import org.folio.client.jira.JiraClient
 import org.folio.client.jira.model.JiraIssue
 import org.folio.karate.KarateConstants
+import org.folio.karate.edge.EdgeConfiguration
 import org.folio.karate.results.KarateExecutionResult
 import org.folio.karate.results.KarateFeatureExecutionSummary
 import org.folio.karate.results.KarateModuleExecutionSummary
 import org.folio.karate.results.KarateTestsExecutionSummary
 import org.folio.karate.teams.KarateTeam
 import org.folio.karate.teams.TeamAssignment
+import org.folio.rest.Okapi
+import org.folio.rest.OkapiUsersProvider
+import org.folio.rest.TenantService
+import org.folio.rest.model.OkapiTenant
+import org.folio.rest.model.OkapiUser
+
+/**
+ * Prepare environment for edge modules karate tests execution
+ *
+ * @param edgeConfiguration edge configuration
+ */
+def prepareEdgeModulesConfiguration(EdgeConfiguration edgeConfiguration) {
+    TenantService tenantService = new TenantService(this, okapiUrl, OkapiUsersProvider.getSuperAdmin())
+    edgeConfiguration.getEdgeServices().each { edgeService ->
+        edgeService.getTenants().each { edgeTenant ->
+            OkapiTenant okapiTenant = okapiSettings.tenant(
+                tenantId: edgeTenant.tenant,
+                tenantName: "${edgeTenant.tenant} edge test tenant",
+                tenantDescription: "${edgeTenant.tenant} edge test tenant",
+                loadReference: true,
+                loadSample: true
+            )
+            OkapiUser adminUser = okapiSettings.adminUser(
+                edgeTenant.user,
+                edgeTenant.password,
+                "${edgeTenant.user} first name",
+                "${edgeTenant.user} last name",
+                "${edgeTenant.user}@test.folio.org",
+            )
+            okapiTenant.setAdmin_user(adminUser)
+
+            tenantService.createTenant(tenant, adminUser)
+        }
+    }
+}
 
 /**
  * Collect karate tests execution statistics based on "karate-summary-json.txt" files content
@@ -219,7 +255,7 @@ String toSearchableSummary(String summary) {
         return summary.split("\\{")[0].trim() + " " + summary.split("\\}")[1].trim()
     } else {
         println("Unexpected summary format '{' and '}' are missing: ${summary}")
-        return  summary
+        return summary
     }
 }
 

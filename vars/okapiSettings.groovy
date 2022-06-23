@@ -1,9 +1,9 @@
 import org.folio.Constants
+import org.folio.rest.model.Email
 import org.folio.rest.model.OkapiTenant
 import org.folio.rest.model.OkapiUser
-import org.folio.rest.model.Email
 
-def tenant(Map args = [:]){
+def tenant(Map args = [:]) {
     return new OkapiTenant(
         id: args.tenantId,
         name: args.tenantName,
@@ -14,19 +14,29 @@ def tenant(Map args = [:]){
     )
 }
 
-def adminUser(){
+def defaultAdminUser() {
     return new OkapiUser(
-        username: 'diku_admin',
-        password: 'admin',
-        firstName: 'DIKU',
-        lastName: 'ADMINISTRATOR',
-        email: 'admin@diku.example.org',
+        'diku_admin',
+        'admin',
+        'DIKU',
+        'ADMINISTRATOR',
+        'admin@diku.example.org'
+    )
+}
+
+def adminUser(String name, String password, String firstName, String lastName, String email) {
+    return new OkapiUser(
+        username: name,
+        password: password,
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
         groupName: 'staff',
         permissions: ["perms.users.assign.immutable", "perms.users.assign.mutable", "perms.users.assign.okapi", "perms.all"]
     )
 }
 
-def email(){
+def email() {
     withCredentials([[$class           : 'AmazonWebServicesCredentialsBinding',
                       credentialsId    : Constants.AWS_CREDENTIALS_ID,
                       accessKeyVariable: 'EMAIL_USERNAME',

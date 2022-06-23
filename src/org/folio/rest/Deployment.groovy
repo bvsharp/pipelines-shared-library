@@ -26,25 +26,13 @@ class Deployment extends GeneralParameters {
 
     private OkapiUser admin_user = new OkapiUser()
 
-    private OkapiUser super_admin = new OkapiUser(username: 'super_admin', password: 'admin')
+    private OkapiUser super_admin = OkapiUsersProvider.getSuperAdmin()
 
-    private OkapiUser testing_admin = new OkapiUser(username: 'testing_admin', password: 'admin')
+    private OkapiUser testing_admin = OkapiUsersProvider.getTestingAdmin()
 
-    private Okapi okapi = new Okapi(steps, okapiUrl, super_admin)
-
-    private Users users = new Users(steps, okapiUrl)
-
-    private Authorization auth = new Authorization(steps, okapiUrl)
-
-    private Permissions permissions = new Permissions(steps, okapiUrl)
-
-    private ServicePoints servicePoints = new ServicePoints(steps, okapiUrl)
+    private Okapi okapi = new Okapi(steps, okapiUrl, OkapiUsersProvider.getSuperAdmin())
 
     private GitHubUtility gitHubUtility = new GitHubUtility(steps)
-
-    private TenantConfiguration tenantConfiguration = new TenantConfiguration(steps, okapiUrl)
-
-    private Edge edge = new Edge(steps, okapiUrl)
 
     Deployment(Object steps, String okapiUrl, String stripesUrl, String repository, String branch, OkapiTenant tenant, OkapiUser admin_user, Email email, String kb_api_key) {
         super(steps, okapiUrl)
