@@ -17,6 +17,7 @@ properties([
         string(name: 'asg_instance_types', defaultValue: 'm5.xlarge,m5a.xlarge,m5d.xlarge,m5ad.xlarge', description: 'List of EC2 shapes to be used in cluster provisioning', trim: true),
         string(name: 'eks_min_size', defaultValue: '4', description: 'Minimum size of node group for eks cluster', trim: true),
         string(name: 'eks_max_size', defaultValue: '8', description: 'Maximum size of node group for eks cluster', trim: true),
+        string(name: 'eks_desired_size', defaultValue: '4', description: 'Minimum size of node group for eks cluster', trim: true),
         string(name: 'vpc_name', defaultValue: 'folio-rancher-vpc', description: 'Name of the target VPC', trim: true),
         booleanParam(name: 'register_in_rancher', defaultValue: true, description: 'Set to false if eks cluster should not be registered in rancher'),
         booleanParam(name: 'deploy_kubecost', defaultValue: true, description: 'Deploy Kubecost')
@@ -57,7 +58,7 @@ ansiColor('xterm') {
                     error('VPC name not specified!!!')
                 }
                 if (params.eks_min_size.toInteger() <= params.eks_max_size.toInteger()) {
-                    tfVars += terraform.generateTfVar('eks_node_group_size', "{ \"min_size\" : ${params.eks_min_size}, \"max_size\" : ${params.eks_max_size}, \"desired_size\" : ${params.eks_min_size} }")
+                    tfVars += terraform.generateTfVar('eks_node_group_size', "{ \"min_size\" : ${params.eks_min_size}, \"max_size\" : ${params.eks_max_size}, \"desired_size\" : ${params.eks_desired_size} }")
                 } else {
                     error('eks_max_size: (' + params.eks_max_size + ') is less or equal then eks_min_size: (' + params.eks_min_size + ')')
                 }

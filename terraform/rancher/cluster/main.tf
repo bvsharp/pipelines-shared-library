@@ -20,12 +20,6 @@ resource "rancher2_cluster" "this" {
     name                = module.eks_cluster.cluster_id
     region              = var.aws_region
     imported            = true
-    node_groups {
-      min_size     = var.eks_node_group_size.min_size
-      max_size     = var.eks_node_group_size.max_size
-      desired_size = var.eks_node_group_size.desired_size
-      name         = module.eks_cluster.cluster_id
-    }
   }
 }
 
