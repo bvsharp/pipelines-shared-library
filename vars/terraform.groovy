@@ -8,10 +8,10 @@ def tfInit(String path, String opts = '') {
     }
 }
 
-def tfPlan(String path, String opts) {
+def tfPlan(String path, String opts, String extraOpts = '') {
     stage('TF plan') {
         dir(path) {
-            sh "terraform plan -input=false -out tfplan ${opts}"
+            sh "terraform plan -input=false -out tfplan ${opts} ${extraOpts}"
         }
     }
 }

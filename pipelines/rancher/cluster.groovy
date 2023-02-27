@@ -19,7 +19,8 @@ properties([
         string(name: 'eks_max_size', defaultValue: '8', description: 'Maximum size of node group for eks cluster', trim: true),
         string(name: 'vpc_name', defaultValue: 'folio-rancher-vpc', description: 'Name of the target VPC', trim: true),
         booleanParam(name: 'register_in_rancher', defaultValue: true, description: 'Set to false if eks cluster should not be registered in rancher'),
-        booleanParam(name: 'deploy_kubecost', defaultValue: true, description: 'Deploy Kubecost')
+        booleanParam(name: 'deploy_kubecost', defaultValue: true, description: 'Deploy Kubecost'),
+        string(name: 'tf_extra_options', defaultValue: '', description: 'Extra options for terraform '),
     ])
 ])
 
@@ -91,7 +92,7 @@ ansiColor('xterm') {
                     terraform.tfWorkspaceSelect(tfWorkDir, cluster_name)
                     terraform.tfStatePull(tfWorkDir)
                     if (params.action == 'apply') {
-                        terraform.tfPlan(tfWorkDir, tfVars)
+                        terraform.tfPlan(tfWorkDir, tfVars, params.tf_extra_options)
                         terraform.tfPlanApprove(tfWorkDir)
                         terraform.tfApply(tfWorkDir)
                     } else if (params.action == 'destroy') {
