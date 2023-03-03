@@ -53,23 +53,3 @@ resource "random_password" "pg_password" {
 locals {
   pg_password = var.pg_password == "" ? random_password.pg_password.result : var.pg_password
 }
-
-output "id" {
-  value = data.aws_db_cluster_snapshot.latest_prod_snapshot.id
-}
-
-output "arn" {
-  value = data.aws_db_cluster_snapshot.latest_prod_snapshot.db_cluster_snapshot_arn
-}
-
-output "status" {
-  value = data.aws_db_cluster_snapshot.latest_prod_snapshot.status
-}
-
-output "snapshot_create_time" {
-  value = data.aws_db_cluster_snapshot.latest_prod_snapshot.snapshot_create_time
-}
-
-output "password" {
-  value = "${local.pg_password}"
-}

@@ -11,14 +11,24 @@ properties([
         booleanParam(name: 'refreshParameters', defaultValue: false, description: 'Do a dry run and refresh pipeline configuration'),
         choice(name: 'action', choices: ['apply', 'destroy',], description: 'Choose what should be done with cluster'),
         jobsParameters.clusterName(),
-        string(name: 'custom_cluster_name', defaultValue: '', description: 'Custom cluster name (Will override rancher_cluster_name)', trim: true),
+        string(name: 'project_namespace', defaultValue: 'monitoring', description: 'project namespace', trim: true),
+        string(name: 'backup_name', defaultValue: 'backup_name1', description: 'project namespace', trim: true),
+
         string(name: 'asg_instance_types', defaultValue: 'm5.xlarge', description: 'List of EC2 shapes to be used in cluster provisioning', trim: true),
         ])
 ])
 
 String tfWorkDir = 'terraform/rancher/RDS-for-get-dump'
 String tfVars = ''
-String cluster_name = params.custom_cluster_name.isEmpty() ? params.rancher_cluster_name : params.custom_cluster_name
+String cluster_name = params.rancher_cluster_name
+terraform_output = ''
+String postgresql_backups_directory = "rds"
+String db_backup_name = params.backup_name
+user=""
+password=""
+database_name=""
+port=""
+endpoint=""
 
 
 ansiColor('xterm') {
@@ -61,19 +71,50 @@ ansiColor('xterm') {
                     terraform.tfStatePull(tfWorkDir)
                     if (params.action == 'apply') {
                         terraform.tfPlan(tfWorkDir, tfVars)
-                        terraform.tfPlanApprove(tfWorkDir)
+                        //terraform.tfPlanApprove(tfWorkDir)
                         terraform.tfApply(tfWorkDir)
+                        terraform_output=terraform.tfOutput(tfWorkDir, '')
+                        user=terraform.tfOutputValue(tfWorkDir, 'user')
+                        password=terraform.tfOutputValue(tfWorkDir, 'password')
+                        database_name=terraform.tfOutputValue(tfWorkDir, 'database_name')
+                        port=terraform.tfOutputValue(tfWorkDir, 'port')
+                        endpoint=terraform.tfOutputValue(tfWorkDir, 'endpoint')
                     } else if (params.action == 'destroy') {
                         input message: "Are you shure that you want to destroy ?"
-                        //terraform.tfRemoveElastic(tfWorkDir)
                         terraform.tfDestroy(tfWorkDir, tfVars)
                     }
                 }
                 stage('pslq') {
 
-                    sh 'psql --version'
-                    sh 'pg_dump -d postgres://folio:Gu9201rbh*12-@tf-20230302122957213300000001.cdxr1geeeqbb.us-west-2.rds.amazonaws.com:5432/folio > 1111.txt'
-                    sh 'cat 1111.txt'
+                    println terraform_output
+
+                    println "${user}  ${password} ${database_name} ${port} ${endpoint}"
+
+                    helm.k8sClient {
+                        psqlDumpMethods.configureKubectl(Constants.AWS_REGION, params.rancher_cluster_name)
+                        psqlDumpMethods.configureHelm(Constants.FOLIO_HELM_HOSTED_REPO_NAME, Constants.FOLIO_HELM_HOSTED_REPO_URL)
+                        try {
+
+                            psqlDumpMethods.backupRDSHelmInstall(env.BUILD_ID, Constants.FOLIO_HELM_HOSTED_REPO_NAME,
+                                Constants.PSQL_DUMP_HELM_CHART_NAME, Constants.PSQL_RDS_DUMP_HELM_INSTALL_CHART_VERSION,
+                                params.project_namespace, params.rancher_cluster_name, db_backup_name,
+                                "s3://" + Constants.PSQL_DUMP_BACKUPS_BUCKET_NAME, postgresql_backups_directory,
+                                endpoint.replaceAll("\"",""), user.replaceAll("\"",""),
+                                password.replaceAll("\"",""), database_name.replaceAll("\"",""),
+                                AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+                            )
+
+                            psqlDumpMethods.helmDelete(env.BUILD_ID, params.project_namespace)
+                            println("\n\n\n" + "\033[32m" + "PostgreSQL backup process SUCCESSFULLY COMPLETED\nYou can find your backup in AWS s3 bucket folio-postgresql-backups/" +
+                                "${params.rancher_cluster_name}/${params.rancher_project_name}/${db_backup_name}" + "\n\n\n" + "\033[0m")
+
+                        }
+                        catch (exception) {
+                            psqlDumpMethods.helmDelete(env.BUILD_ID, params.project_namespace)
+                            println("\n\n\n" + "\033[1;31m" + "PostgreSQL backup/restore process was FAILED!!!\nPlease, check logs and try again.\n\n\n" + "\033[0m")
+                            throw exception
+                        }
+                    }
                 }
             }
         } catch (exception) {

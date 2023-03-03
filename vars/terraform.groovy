@@ -59,10 +59,20 @@ def tfStatePull(String path) {
 def tfOutput(String path, String variable) {
     stage('TF output') {
         dir(path) {
-            def output = sh(script: "terraform output -raw ${variable}", returnStdout: true).trim()
+            def specify_output = ""
+            if (variable!='')
+                specify_output = "-raw ${variable}"
+            def output = sh(script: "terraform output ${specify_output}", returnStdout: true).trim()
             return output
         }
     }
+}
+
+def tfOutputValue(String path, String variable) {
+        dir(path) {
+            def output = sh(script: "terraform output ${variable}", returnStdout: true).trim()
+            return output
+        }
 }
 
 def tfWorkspaceSelect(String path, String name) {
