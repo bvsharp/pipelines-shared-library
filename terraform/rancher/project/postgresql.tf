@@ -48,7 +48,7 @@ resource "rancher2_app_v2" "postgresql" {
             GRANT USAGE ON SCHEMA public TO ldp;
       persistence:
         enabled: true
-        size: 20Gi
+        size: ${var.db_postgres_size}Gi
         storageClass: gp2
       resources:
         requests:

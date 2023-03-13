@@ -55,7 +55,7 @@ void okapi(Project project_config) {
     helm.k8sClient {
         awscli.getKubeConfig(Constants.AWS_REGION, project_config.getClusterName())
         helm.addRepo(Constants.FOLIO_HELM_V2_REPO_NAME, Constants.FOLIO_HELM_V2_REPO_URL, true)
-        helm.upgrade('okapi', project_config.getProjectName(), "${values_path}/okapi.yaml", Constants.FOLIO_HELM_V2_REPO_NAME, 'okapi')
+        helm.upgradeokapy('okapi', project_config.getProjectName(), "${values_path}/okapi.yaml", Constants.FOLIO_HELM_V2_REPO_NAME, 'okapi')
     }
 }
 

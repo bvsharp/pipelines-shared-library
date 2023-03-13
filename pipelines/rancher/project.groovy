@@ -1,5 +1,5 @@
 #!groovy
-@Library('pipelines-shared-library') _
+@Library('pipelines-shared-library@RANCHER-314-misha') _
 
 import org.folio.Constants
 import org.folio.rest.Deployment
@@ -54,7 +54,11 @@ properties([
         booleanParam(name: 'pgadmin4', defaultValue: true, description: 'Deploy pgadmin4'),
         booleanParam(name: 'kafka_ui', defaultValue: true, description: 'Deploy kafka-ui'),
         booleanParam(name: 'greenmail_server', defaultValue: false, description: 'Deploy greenmail server'),
-        booleanParam(name: 'opensearch_dashboards', defaultValue: true, description: 'Deploy opensearch-dashboards')])])
+        booleanParam(name: 'opensearch_dashboards', defaultValue: true, description: 'Deploy opensearch-dashboards'),
+        string(name: 'db_postgres_size', defaultValue: '20', description: 'DB instance type', trim: true)
+    ])])
+
+
 
 OkapiTenant tenant = new OkapiTenant(id: params.tenant_id,
     name: params.tenant_name,
@@ -154,6 +158,8 @@ ansiColor('xterm') {
                 tf.variables += terraform.generateTfVar('kafka_ui', params.kafka_ui)
                 tf.variables += terraform.generateTfVar('opensearch_dashboards', params.opensearch_dashboards)
                 tf.variables += terraform.generateTfVar('pg_ldp_user_password', "${jobsParameters.pgLdpUserDefaultPassword()}")
+                tf.variables += terraform.generateTfVar('db_postgres_size', params.db_postgres_size)
+
 
 
                 tf.variables += terraform.generateTfVar('github_team_ids', new Tools(this).getGitHubTeamsIds([] + Constants.ENVS_MEMBERS_LIST[params.rancher_project_name] + params.github_teams - null).collect { '"' + it + '"' })

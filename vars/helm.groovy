@@ -33,7 +33,12 @@ def install(String name, String namespace, String values_path, String chart_repo
 
 // Upgrading the helm chart.
 def upgrade(String name, String namespace, String values_path, String chart_repo, String chart_name) {
-    sh "helm upgrade --install ${name} --namespace=${namespace} -f ${values_path} ${chart_repo}/${chart_name}"
+    sh "helm upgrade --install ${name} --namespace=${namespace} -f ${values_path} ${chart_repo}/${chart_name} "
+}
+
+// Upgrading the helm chart.
+def upgradeokapy(String name, String namespace, String values_path, String chart_repo, String chart_name) {
+    sh "helm upgrade --install ${name} --namespace=${namespace} -f ${values_path} ${chart_repo}/${chart_name} --version 0.3.34"
 }
 
 // Deleting the helm chart.

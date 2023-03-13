@@ -239,3 +239,9 @@ variable "pg_ldp_user_password" {
   type    = string
   description = "Postgresql password for ldp user"
 }
+
+variable "db_postgres_size" {
+  type    = number
+  default = 20
+  description = "Postgresql db size"
+}

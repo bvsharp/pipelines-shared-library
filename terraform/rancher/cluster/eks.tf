@@ -32,7 +32,7 @@ module "eks_cluster" {
   version = "18.30.2"
 
   cluster_name      = terraform.workspace
-  cluster_version   = "1.21" //For kube-poxy metrics 1.22 version needed
+  cluster_version   = "1.22" //For kube-poxy metrics 1.22 version needed
   cluster_ip_family = "ipv4"
 
   vpc_id     = data.aws_vpc.this.id

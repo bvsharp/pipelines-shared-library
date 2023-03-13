@@ -12,9 +12,12 @@ properties([
         choice(name: 'action', choices: ['apply', 'destroy',], description: 'Choose what should be done with cluster'),
         jobsParameters.clusterName(),
         string(name: 'project_namespace', defaultValue: 'monitoring', description: 'project namespace', trim: true),
+        string(name: 'Snapshot_id', defaultValue: 'arn:aws:rds:us-west-2:732722833398:cluster-snapshot:nbf-bugfest-snapshot-11-07-2022',
+            description: 'arn of snapshot', trim: true),
         string(name: 'backup_name', defaultValue: 'backup_name1', description: 'project namespace', trim: true),
-
-        string(name: 'asg_instance_types', defaultValue: 'm5.xlarge', description: 'List of EC2 shapes to be used in cluster provisioning', trim: true),
+        string(name: 'pg_password', defaultValue: '', description: 'database password', trim: true),
+        string(name: 'kubernetice_secret_name', defaultValue: 'default-token-cxpdl', description: 'Used for escape error in container if we run it in namespace where we do not have these secrets s3CredentialsSecret and dbCredentialsSecret ', trim: true),
+        string(name: 'asg_instance_types', defaultValue: 'db.r5.xlarge', description: 'DB instance type', trim: true),
         ])
 ])
 
@@ -43,9 +46,10 @@ ansiColor('xterm') {
                 buildDescription "action: ${params.action}\n"
             }
             stage('TF vars') {
-               // tfVars += terraform.generateTfVar('admin_users', Constants.AWS_ADMIN_USERS)
-               // tfVars += terraform.generateTfVar('projectID', Constants.AWS_PROJECT_ID)
-                           }
+               tfVars += terraform.generateTfVar('arn_db_snapshot', params.Snapshot_id)
+               tfVars += terraform.generateTfVar('pg_password', params.pg_password)
+               tfVars += terraform.generateTfVar('asg_instance_types', params.asg_instance_types)
+            }
             stage('Checkout') {
                 checkout scm
             }
@@ -58,12 +62,7 @@ ansiColor('xterm') {
                  credentialsId    : Constants.AWS_CREDENTIALS_ID,
                  accessKeyVariable: 'TF_VAR_aws_access_key_id',
                  secretKeyVariable: 'TF_VAR_aws_secret_access_key'],
-                [$class           : 'AmazonWebServicesCredentialsBinding',
-                 credentialsId    : Constants.KUBECOST_AWS_CREDENTIALS_ID,
-                 accessKeyVariable: 'TF_VAR_aws_kubecost_access_key_id',
-                 secretKeyVariable: 'TF_VAR_aws_kubecost_secret_access_key'],
-                string(credentialsId: Constants.RANCHER_TOKEN_ID, variable: 'TF_VAR_rancher_token_key'),
-                string(credentialsId: Constants.KUBECOST_LICENSE_KEY, variable: 'TF_VAR_kubecost_licence_key')
+                string(credentialsId: Constants.RANCHER_TOKEN_ID, variable: 'TF_VAR_rancher_token_key')
             ]) {
                 docker.image(Constants.TERRAFORM_DOCKER_CLIENT).inside("-u 0:0 --entrypoint=") {
                     terraform.tfInit(tfWorkDir, '')
@@ -71,9 +70,7 @@ ansiColor('xterm') {
                     terraform.tfStatePull(tfWorkDir)
                     if (params.action == 'apply') {
                         terraform.tfPlan(tfWorkDir, tfVars)
-                        //terraform.tfPlanApprove(tfWorkDir)
                         terraform.tfApply(tfWorkDir)
-                        terraform_output=terraform.tfOutput(tfWorkDir, '')
                         user=terraform.tfOutputValue(tfWorkDir, 'user')
                         password=terraform.tfOutputValue(tfWorkDir, 'password')
                         database_name=terraform.tfOutputValue(tfWorkDir, 'database_name')
@@ -84,35 +81,61 @@ ansiColor('xterm') {
                         terraform.tfDestroy(tfWorkDir, tfVars)
                     }
                 }
-                stage('pslq') {
-
-                    println terraform_output
-
-                    println "${user}  ${password} ${database_name} ${port} ${endpoint}"
-
+            }
+            stage('Backup Connection') {
+                if (params.action == 'apply') {
                     helm.k8sClient {
                         psqlDumpMethods.configureKubectl(Constants.AWS_REGION, params.rancher_cluster_name)
                         psqlDumpMethods.configureHelm(Constants.FOLIO_HELM_HOSTED_REPO_NAME, Constants.FOLIO_HELM_HOSTED_REPO_URL)
                         try {
-
-                            psqlDumpMethods.backupRDSHelmInstall(env.BUILD_ID, Constants.FOLIO_HELM_HOSTED_REPO_NAME,
-                                Constants.PSQL_DUMP_HELM_CHART_NAME, Constants.PSQL_RDS_DUMP_HELM_INSTALL_CHART_VERSION,
-                                params.project_namespace, params.rancher_cluster_name, db_backup_name,
-                                "s3://" + Constants.PSQL_DUMP_BACKUPS_BUCKET_NAME, postgresql_backups_directory,
-                                endpoint.replaceAll("\"",""), user.replaceAll("\"",""),
-                                password.replaceAll("\"",""), database_name.replaceAll("\"",""),
-                                AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
-                            )
-
+                            withCredentials([
+                                string(credentialsId: password.replaceAll("\"", ""), variable: 'Password')
+                            ]) {
+                                psqlDumpMethods.backupRDSHelmInstall(
+                                    env.BUILD_ID,
+                                    Constants.FOLIO_HELM_HOSTED_REPO_NAME,
+                                    Constants.PSQL_DUMP_HELM_CHART_NAME,
+                                    Constants.PSQL_RDS_DUMP_HELM_INSTALL_CHART_VERSION,
+                                    params.project_namespace,
+                                    params.rancher_cluster_name,
+                                    db_backup_name,
+                                    "s3://" + Constants.PSQL_DUMP_BACKUPS_BUCKET_NAME,
+                                    postgresql_backups_directory,
+                                    endpoint.replaceAll("\"", ""),
+                                    user.replaceAll("\"", ""),
+                                    Password,
+                                    database_name.replaceAll("\"", ""),
+                                    params.kubernetice_secret_name,
+                                    AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+                                )
+                            }
                             psqlDumpMethods.helmDelete(env.BUILD_ID, params.project_namespace)
                             println("\n\n\n" + "\033[32m" + "PostgreSQL backup process SUCCESSFULLY COMPLETED\nYou can find your backup in AWS s3 bucket folio-postgresql-backups/" +
                                 "${params.rancher_cluster_name}/${params.rancher_project_name}/${db_backup_name}" + "\n\n\n" + "\033[0m")
-
                         }
                         catch (exception) {
                             psqlDumpMethods.helmDelete(env.BUILD_ID, params.project_namespace)
                             println("\n\n\n" + "\033[1;31m" + "PostgreSQL backup/restore process was FAILED!!!\nPlease, check logs and try again.\n\n\n" + "\033[0m")
                             throw exception
+                        }
+                    }
+                    withCredentials([
+                        [$class           : 'AmazonWebServicesCredentialsBinding',
+                         credentialsId    : Constants.AWS_CREDENTIALS_ID,
+                         accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                         secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
+                        [$class           : 'AmazonWebServicesCredentialsBinding',
+                         credentialsId    : Constants.AWS_CREDENTIALS_ID,
+                         accessKeyVariable: 'TF_VAR_aws_access_key_id',
+                         secretKeyVariable: 'TF_VAR_aws_secret_access_key'],
+                        string(credentialsId: Constants.RANCHER_TOKEN_ID, variable: 'TF_VAR_rancher_token_key')
+                    ]) {
+                        docker.image(Constants.TERRAFORM_DOCKER_CLIENT).inside("-u 0:0 --entrypoint=") {
+                            terraform.tfInit(tfWorkDir, '')
+                            terraform.tfWorkspaceSelect(tfWorkDir, "copy-rds-data-to-kubernetes")
+                            terraform.tfStatePull(tfWorkDir)
+                            terraform.tfDestroy(tfWorkDir, tfVars)
+
                         }
                     }
                 }
@@ -127,3 +150,4 @@ ansiColor('xterm') {
         }
     }
 }
+

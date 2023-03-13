@@ -22,7 +22,7 @@ variable "aws_secret_access_key" {
 
 variable "asg_instance_types" {
   type        = list(string)
-  default     = ["m5.xlarge"]
+  default     = ["db.r5.xlarge"]
   description = "List of EC2 instance machine types to be used in EKS."
 }
 
@@ -38,6 +38,10 @@ variable "tags" {
 
 variable "pg_password" {
   type        = string
-  default     = "Gu9201rbh*12-"
   description = "Postgres password"
+}
+
+variable "arn_db_snapshot" {
+  type        = string
+  description = ""
 }

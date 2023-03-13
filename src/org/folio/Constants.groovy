@@ -44,8 +44,8 @@ class Constants {
     static String FOLIO_HELM_HOSTED_REPO_URL = "https://repository.folio.org/repository/helm-hosted/"
     static String FOLIO_NPM_REPO_URL = "https://repository.folio.org/repository/npm-folioci/"
 
-    static String FOLIO_HELM_V2_REPO_URL= "https://repository.folio.org/repository/folio-helm-v2/"
-    static String FOLIO_HELM_V2_REPO_NAME = "folio-helm-v2"
+    static String FOLIO_HELM_V2_REPO_URL= "https://repository.folio.org/repository/folio-helm-v2-test/"
+    static String FOLIO_HELM_V2_REPO_NAME = "folio-helm-v2-test"
 
     // Docker
     static String DOCKER_DEV_REPOSITORY_CREDENTIALS_ID = "folio-docker-dev"
@@ -68,7 +68,7 @@ class Constants {
     static String PSQL_DUMP_HELM_CHART_NAME = "psql-dump"
     static String PSQL_DUMP_HELM_INSTALL_CHART_VERSION = "1.0.3"
     static String PSQL_DUMP_BACKUPS_BUCKET_NAME = "folio-postgresql-backups"
-    static String PSQL_RDS_DUMP_HELM_INSTALL_CHART_VERSION = "1.0.4-RANCHER-314-20230308155125"
+    static String PSQL_RDS_DUMP_HELM_INSTALL_CHART_VERSION = "1.0.4-RANCHER-314-20230314112446"
 
     //Tools
     static String MAVEN_TOOL_NAME = "maven3-jenkins-slave-all"

@@ -1,15 +1,9 @@
-variable "arn_db_snapshot" {
-  type        = string
-  default     = "arn:aws:rds:us-west-2:732722833398:cluster-snapshot:nbf-bugfest-snapshot-11-07-2022"
-  description = ""
-}
-
 data "aws_db_cluster_snapshot" "latest_prod_snapshot" {
   db_cluster_snapshot_identifier = var.arn_db_snapshot
 }
 
 resource "aws_rds_cluster" "aurora" {
-  cluster_identifier   = "temporary-rds-cluster-destroy-during-hour"
+  cluster_identifier   = "temporary-rds-cluster-destroy-after-4-hours"
   snapshot_identifier  = data.aws_db_cluster_snapshot.latest_prod_snapshot.id
   db_subnet_group_name = aws_db_subnet_group.default.name
   engine               = data.aws_db_cluster_snapshot.latest_prod_snapshot.engine
@@ -22,14 +16,14 @@ resource "aws_rds_cluster" "aurora" {
 
 resource "aws_rds_cluster_instance" "aurora" {
   cluster_identifier   = aws_rds_cluster.aurora.id
-  instance_class       = "db.r5.xlarge"//"db.t2.small"
+  instance_class       = var.asg_instance_types
   db_subnet_group_name = aws_db_subnet_group.default.name
   engine               = data.aws_db_cluster_snapshot.latest_prod_snapshot.engine
   engine_version       = data.aws_db_cluster_snapshot.latest_prod_snapshot.engine_version
 }
 
 resource "aws_db_subnet_group" "default" {
-  name       = "mykhailo-test-should-destroy"
+  name       = "temporary-should-destroy-in-4-hours"
   subnet_ids = data.aws_subnets.database.ids
 
   tags = {
@@ -47,7 +41,7 @@ resource "random_password" "pg_password" {
   min_numeric      = 2
   min_special      = 2
   min_upper        = 2
-  override_special = "‘~!@#$%^&*()_-+={}[]\\/<>,.;?':|"
+  override_special = "@$%-+=?:|"
 }
 
 locals {
