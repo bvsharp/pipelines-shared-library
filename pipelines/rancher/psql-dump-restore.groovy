@@ -55,7 +55,7 @@ ansiColor('xterm') {
                             "${params.rancher_cluster_name}/${params.rancher_project_name}/${db_backup_name}" + "\n\n\n" + "\033[0m")
                     } else {
                         println "test---"
-                        psqlDumpMethods.restoreHelmInstall(env.BUILD_ID, Constants.FOLIO_HELM_HOSTED_REPO_NAME, Constants.PSQL_DUMP_HELM_CHART_NAME, Constants.PSQL_RDS_DUMP_HELM_INSTALL_CHART_VERSION, params.rancher_project_name,
+                        psqlDumpMethods.restoreRDSHelmInstall(env.BUILD_ID, Constants.FOLIO_HELM_HOSTED_REPO_NAME, Constants.PSQL_DUMP_HELM_CHART_NAME, Constants.PSQL_RDS_DUMP_HELM_INSTALL_CHART_VERSION, params.rancher_project_name,
                             db_backup_name, "s3://" + Constants.PSQL_DUMP_BACKUPS_BUCKET_NAME, postgresql_backups_directory
                            )
                         psqlDumpMethods.helmDelete(env.BUILD_ID, params.rancher_project_name)

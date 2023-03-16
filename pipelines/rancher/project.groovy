@@ -120,7 +120,13 @@ ansiColor('xterm') {
             stage('Restore preparation') {
                 if (project_config.getRestoreFromBackup()) {
                     helm.k8sClient {
-                        project_config.backupFilesPath = "${Constants.PSQL_DUMP_BACKUPS_BUCKET_NAME}/${project_config.getBackupType()}/${project_config.getBackupName()}/${project_config.getBackupName()}"
+//                        project_config.backupFilesPath = "${Constants.PSQL_DUMP_BACKUPS_BUCKET_NAME}/${project_config.getBackupType()}/${project_config.getBackupName()}/${project_config.getBackupName()}"
+//                        project_config.installJson = new Tools(this).jsonParse(awscli.getS3FileContent("${project_config.getBackupFilesPath()}-install.json"))
+//                        project_config.uiBundleTag = awscli.getS3FileContent("${project_config.getBackupFilesPath()}-image-tag.txt")
+//                        tenant.okapiVersion = common.getOkapiVersion(project_config.getInstallJson())
+
+
+                        project_config.backupFilesPath = "${Constants.PSQL_DUMP_BACKUPS_BUCKET_NAME}/rds/${project_config.getBackupName()}/${project_config.getBackupName()}"
                         project_config.installJson = new Tools(this).jsonParse(awscli.getS3FileContent("${project_config.getBackupFilesPath()}-install.json"))
                         project_config.uiBundleTag = awscli.getS3FileContent("${project_config.getBackupFilesPath()}-image-tag.txt")
                         tenant.okapiVersion = common.getOkapiVersion(project_config.getInstallJson())

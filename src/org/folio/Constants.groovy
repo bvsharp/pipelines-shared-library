@@ -68,7 +68,7 @@ class Constants {
     static String PSQL_DUMP_HELM_CHART_NAME = "psql-dump"
     static String PSQL_DUMP_HELM_INSTALL_CHART_VERSION = "1.0.3"
     static String PSQL_DUMP_BACKUPS_BUCKET_NAME = "folio-postgresql-backups"
-    static String PSQL_RDS_DUMP_HELM_INSTALL_CHART_VERSION = "1.0.4-RANCHER-314-20230314112446"
+    static String PSQL_RDS_DUMP_HELM_INSTALL_CHART_VERSION = "1.0.4-RANCHER-314-20230317083121"
 
     //Tools
     static String MAVEN_TOOL_NAME = "maven3-jenkins-slave-all"

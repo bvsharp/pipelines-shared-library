@@ -11,7 +11,7 @@ resource "aws_rds_cluster" "aurora" {
   master_username      = "folio"
   master_password      = local.pg_password
   skip_final_snapshot  = true
-  database_name = "folio"
+  database_name = "testDB"
 }
 
 resource "aws_rds_cluster_instance" "aurora" {
@@ -41,7 +41,7 @@ resource "random_password" "pg_password" {
   min_numeric      = 2
   min_special      = 2
   min_upper        = 2
-  override_special = "@$%-+=?:|"
+  override_special = "@$%-+=?"
 }
 
 locals {

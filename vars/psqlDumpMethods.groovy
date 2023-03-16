@@ -43,16 +43,17 @@ def backupRDSHelmInstall(String build_id, String repo_name, String chart_name, S
             --set psql.s3BackupsBucketDirectory=${postgresql_backups_directory} \
             --set rds.host=${host} \
             --set rds.user=${user} \
-            --set rds.password=${password} \
+            --set rds.password='${password}' \
             --set rds.database=${database} \
             --set rds.port='\"5432\"' \
             --set rds.aws_access_key=${aws_access_key} \
             --set rds.aws_secret_key=${aws_secret_key} \
             --set psql.job.container.s3CredentialsSecret=${kubernetice_secret_name} \
             --set psql.job.container.dbCredentialsSecret=${kubernetice_secret_name} \
-            --namespace=${project_namespace} --timeout 420m --wait --wait-for-jobs"
+            --namespace=${project_namespace} --timeout 500m --wait --wait-for-jobs"
         }
-        else {sh "helm install psql-dump-build-id-${build_id} ${repo_name}/${chart_name} --version ${chart_version} --set psql.projectNamespace=${project_namespace} \
+        else {
+            sh "helm install psql-dump-build-id-${build_id} ${repo_name}/${chart_name} --version ${chart_version} --set psql.projectNamespace=${project_namespace} \
             --set psql.dbBackupName=${db_backup_name} --set psql.job.action='rds_backup' --set psql.clusterName=${cluster_name} \
             --set psql.s3BackupsBucketName=${psql_dump_backups_bucket_name} \
             --set psql.s3BackupsBucketDirectory=${postgresql_backups_directory} \
@@ -63,7 +64,20 @@ def backupRDSHelmInstall(String build_id, String repo_name, String chart_name, S
             --set rds.port='\"5432\"' \
             --set rds.aws_access_key=${aws_access_key} \
             --set rds.aws_secret_key=${aws_secret_key} \
-            --namespace=${project_namespace} --timeout 420m --wait --wait-for-jobs"}
+            --namespace=${project_namespace} --timeout 500m --wait --wait-for-jobs"}
+    }
+}
+
+def restoreRDSHelmInstall(String build_id, String repo_name, String chart_name, String chart_version, String project_namespace,
+                       String db_backup_name, String psql_dump_backups_bucket_name, String postgresql_backups_directory) {
+    stage('Helm install') {
+        sh "helm install psql-dump-build-id-${build_id} ${repo_name}/${chart_name} --version ${chart_version} --set psql.projectNamespace=${project_namespace} \
+        --set psql.dbBackupName=${db_backup_name} --set psql.job.action='rds_restore' \
+        --set psql.s3BackupsBucketName=${psql_dump_backups_bucket_name} \
+        --set rds.database='folio' \
+        --set rds.port='\"5432\"' \
+        --set psql.s3BackupsBucketDirectory=${postgresql_backups_directory} \
+        --namespace=${project_namespace} --timeout 600m --wait --wait-for-jobs"
     }
 }
 

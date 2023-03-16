@@ -83,42 +83,41 @@ ansiColor('xterm') {
                 }
             }
             stage('Backup Connection') {
-                if (params.action == 'apply') {
+                println"PGPASSWORD=${password} psql -h ${endpoint} --port=${port} -U ${user} --dbname=${database_name}"
+                /// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                if (params.action == 'plan') {
                     helm.k8sClient {
                         psqlDumpMethods.configureKubectl(Constants.AWS_REGION, params.rancher_cluster_name)
                         psqlDumpMethods.configureHelm(Constants.FOLIO_HELM_HOSTED_REPO_NAME, Constants.FOLIO_HELM_HOSTED_REPO_URL)
                         try {
-                            withCredentials([
-                                string(credentialsId: password.replaceAll("\"", ""), variable: 'Password')
-                            ]) {
-                                psqlDumpMethods.backupRDSHelmInstall(
-                                    env.BUILD_ID,
-                                    Constants.FOLIO_HELM_HOSTED_REPO_NAME,
-                                    Constants.PSQL_DUMP_HELM_CHART_NAME,
-                                    Constants.PSQL_RDS_DUMP_HELM_INSTALL_CHART_VERSION,
-                                    params.project_namespace,
-                                    params.rancher_cluster_name,
-                                    db_backup_name,
-                                    "s3://" + Constants.PSQL_DUMP_BACKUPS_BUCKET_NAME,
-                                    postgresql_backups_directory,
-                                    endpoint.replaceAll("\"", ""),
-                                    user.replaceAll("\"", ""),
-                                    Password,
-                                    database_name.replaceAll("\"", ""),
-                                    params.kubernetice_secret_name,
-                                    AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
-                                )
-                            }
+                            psqlDumpMethods.backupRDSHelmInstall(
+                                env.BUILD_ID,
+                                Constants.FOLIO_HELM_HOSTED_REPO_NAME,
+                                Constants.PSQL_DUMP_HELM_CHART_NAME,
+                                Constants.PSQL_RDS_DUMP_HELM_INSTALL_CHART_VERSION,
+                                params.project_namespace,
+                                params.rancher_cluster_name,
+                                db_backup_name,
+                                "s3://" + Constants.PSQL_DUMP_BACKUPS_BUCKET_NAME,
+                                postgresql_backups_directory,
+                                endpoint.replaceAll("\"", ""),
+                                user.replaceAll("\"", ""),
+                                password.replaceAll("\"", ""),
+                                database_name.replaceAll("\"", ""),
+                                params.kubernetice_secret_name,
+                                AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+                            )
                             psqlDumpMethods.helmDelete(env.BUILD_ID, params.project_namespace)
                             println("\n\n\n" + "\033[32m" + "PostgreSQL backup process SUCCESSFULLY COMPLETED\nYou can find your backup in AWS s3 bucket folio-postgresql-backups/" +
                                 "${params.rancher_cluster_name}/${params.rancher_project_name}/${db_backup_name}" + "\n\n\n" + "\033[0m")
+                            }
+                            catch (exception) {
+                                psqlDumpMethods.helmDelete(env.BUILD_ID, params.project_namespace)
+                                println("\n\n\n" + "\033[1;31m" + "PostgreSQL backup/restore process was FAILED!!!\nPlease, check logs and try again.\n\n\n" + "\033[0m")
+                                throw exception
+                            }
                         }
-                        catch (exception) {
-                            psqlDumpMethods.helmDelete(env.BUILD_ID, params.project_namespace)
-                            println("\n\n\n" + "\033[1;31m" + "PostgreSQL backup/restore process was FAILED!!!\nPlease, check logs and try again.\n\n\n" + "\033[0m")
-                            throw exception
-                        }
-                    }
+
                     withCredentials([
                         [$class           : 'AmazonWebServicesCredentialsBinding',
                          credentialsId    : Constants.AWS_CREDENTIALS_ID,
