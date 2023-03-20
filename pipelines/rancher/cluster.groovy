@@ -94,11 +94,11 @@ ansiColor('xterm') {
                     terraform.tfStatePull(tfWorkDir)
                     if (params.action == 'apply') {
                         terraform.tfPlan(tfWorkDir, tfVars)
-                        terraform.tfPlanApprove(tfWorkDir)
+                      //  terraform.tfPlanApprove(tfWorkDir)
                         terraform.tfApply(tfWorkDir)
                     } else if (params.action == 'destroy') {
-                        input message: "Are you shure that you want to destroy ${cluster_name} cluster?"
-                        terraform.tfRemoveElastic(tfWorkDir)
+                        //input message: "Are you shure that you want to destroy ${cluster_name} cluster?"
+                       // terraform.tfRemoveElastic(tfWorkDir)
                         terraform.tfDestroy(tfWorkDir, tfVars)
                     }
                 }

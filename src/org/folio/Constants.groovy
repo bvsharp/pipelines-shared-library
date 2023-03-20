@@ -60,6 +60,7 @@ class Constants {
     static String JENKINS_MASTER_NODE = "master"
     static String JENKINS_JOB_PROJECT = "/Rancher/Project"
     static String JENKINS_JOB_RESTORE_PG_BACKUP = "Rancher/Create-Restore-PosgreSQL-DB-backup"
+    static String JENKINS_TEST_JOB_RESTORE_PG_BACKUP = "Rancher/RANCHER-314-restore"
     static String JENKINS_JOB_BACKEND_MODULES_DEPLOY_BRANCH = "/Rancher/Update/backend-modules-deploy-branch"
 
     static String TERRAFORM_DOCKER_CLIENT = "hashicorp/terraform:0.15.0"
@@ -68,7 +69,7 @@ class Constants {
     static String PSQL_DUMP_HELM_CHART_NAME = "psql-dump"
     static String PSQL_DUMP_HELM_INSTALL_CHART_VERSION = "1.0.3"
     static String PSQL_DUMP_BACKUPS_BUCKET_NAME = "folio-postgresql-backups"
-    static String PSQL_RDS_DUMP_HELM_INSTALL_CHART_VERSION = "1.0.4-RANCHER-314-20230317083121"
+    static String PSQL_RDS_DUMP_HELM_INSTALL_CHART_VERSION =  "1.0.4-RANCHER-314-20230324003527"//"1.0.4-RANCHER-314-20230323074151"//"1.0.4-RANCHER-314-20230322182056"
 
     //Tools
     static String MAVEN_TOOL_NAME = "maven3-jenkins-slave-all"

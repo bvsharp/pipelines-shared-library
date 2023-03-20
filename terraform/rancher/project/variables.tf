@@ -88,7 +88,7 @@ variable "pg_version" {
 
 variable "pg_dbname" {
   type        = string
-  default     = "folio_modules"
+  default     = "folio"
   description = "Postgres DB name"
 }
 

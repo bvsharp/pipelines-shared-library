@@ -46,15 +46,19 @@ resource "rancher2_app_v2" "postgresql" {
             GRANT ALL ON SCHEMA public TO ldpadmin;
             GRANT USAGE ON SCHEMA public TO ldpconfig;
             GRANT USAGE ON SCHEMA public TO ldp;
+      audit:
+        logHostname: true
       persistence:
         enabled: true
         size: ${var.db_postgres_size}Gi
         storageClass: gp2
       resources:
         requests:
-          memory: 512Mi
+          cpu: '2'
+          memory: 1Gi
         limits:
-          memory: 10240Mi
+          cpu: '3.5'
+          memory: 20Gi
       podSecurityContext:
         fsGroup: 1001
       containerSecurityContext:
