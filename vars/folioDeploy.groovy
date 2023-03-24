@@ -7,7 +7,7 @@ import org.folio.utilities.Logger
 import org.folio.utilities.Tools
 import org.folio.utilities.model.Project
 
-void project(Project project_config, OkapiTenant tenant, Map tf) {
+void  project(Project project_config, OkapiTenant tenant, Map tf) {
     switch (project_config.getAction()) {
         case "apply":
             terraform.tfWrapper {
@@ -21,14 +21,14 @@ void project(Project project_config, OkapiTenant tenant, Map tf) {
                                 stage('Restore DB') {
                                     terraform.tfPostgreSQLPlan(tf.working_dir, tf.variables ?: '')
                                     terraform.tfApply(tf.working_dir)
-                                    build job: Constants.JENKINS_TEST_JOB_RESTORE_PG_BACKUP,
-                                        parameters: [string(name: 'rancher_cluster_name', value: project_config.getClusterName()),
-                                                     string(name: 'rancher_project_name', value: project_config.getProjectName()),
-                                                     string(name: 'tenant_id_to_backup_modules_versions', value: tenant.getId()),
-                                                     booleanParam(name: 'restore_from_backup', value: project_config.getRestoreFromBackup()),
-                                                     string(name: 'backup_name', value: project_config.getBackupName()),
-                                                     string(name: 'postgresql_backups_directory', value: 'rds')
-                                        ]
+//                                    build job: Constants.JENKINS_TEST_JOB_RESTORE_PG_BACKUP,
+//                                        parameters: [string(name: 'rancher_cluster_name', value: project_config.getClusterName()),
+//                                                     string(name: 'rancher_project_name', value: project_config.getProjectName()),
+//                                                     string(name: 'tenant_id_to_backup_modules_versions', value: tenant.getId()),
+//                                                     booleanParam(name: 'restore_from_backup', value: project_config.getRestoreFromBackup()),
+//                                                     string(name: 'backup_name', value: project_config.getBackupName()),
+//                                                     string(name: 'postgresql_backups_directory', value: 'rds')
+//                                        ]
                                 }
                             }
                         } else {
