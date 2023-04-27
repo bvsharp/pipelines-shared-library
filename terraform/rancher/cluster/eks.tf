@@ -123,9 +123,16 @@ module "eks_cluster" {
       min_size     = var.eks_nodes_group_size.min_size
       max_size     = var.eks_nodes_group_size.max_size
       desired_size = var.eks_nodes_group_size.min_size
-
-      bootstrap_extra_args = "--kubelet-extra-args \"--allowed-unsafe-sysctls=net.ipv4.tcp_keepalive_time,net.ipv4.tcp_keepalive_intvl\""
-      enable_bootstrap_user_data = true
+      
+      pre_bootstrap_user_data = <<-EOT
+      #!/bin/bash
+      set -ex
+      cat <<-EOF > /etc/profile.d/bootstrap.sh
+      export KUBELET_EXTRA_ARGS="--allowed-unsafe-sysctls=net.ipv4.tcp_keepalive_time,net.ipv4.tcp_keepalive_intvl"
+      EOF
+      # Source extra environment variables in bootstrap script
+      sed -i '/^set -o errexit/a\\nsource /etc/profile.d/bootstrap.sh' /etc/eks/bootstrap.sh
+      EOT
 
       # For future schedule https://registry.terraform.io/modules/terraform-aws-modules/eks/aws/latest/submodules/eks-managed-node-group#input_schedules
     }
