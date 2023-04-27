@@ -112,7 +112,7 @@ module "eks_cluster" {
     eks_node_group = {
       name        = terraform.workspace
       description = "EKS managed node group"
-      ami_type    = "AL2_x86_64"
+      #ami_type    = "AL2_x86_64"
       ami_id      = data.aws_ami.eks_default.image_id
 
       capacity_type  = var.eks_nodes_type
