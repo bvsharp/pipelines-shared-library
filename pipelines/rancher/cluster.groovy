@@ -1,5 +1,5 @@
 #!groovy
-@Library('pipelines-shared-library') _
+@Library('pipelines-shared-library@RANCHER-768-rancher-cluster') _
 
 import org.folio.Constants
 
