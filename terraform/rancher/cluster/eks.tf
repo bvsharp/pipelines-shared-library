@@ -126,6 +126,7 @@ module "eks_cluster" {
 
       #https://aws.amazon.com/blogs/networking-and-content-delivery/implementing-long-running-tcp-connections-within-vpc-networking/
       #https://github.com/terraform-aws-modules/terraform-aws-eks/issues/1770
+      create_launch_template = false
       pre_bootstrap_user_data = <<-EOT
       #!/bin/bash
       set -ex
