@@ -123,9 +123,7 @@ module "eks_cluster" {
       min_size     = var.eks_nodes_group_size.min_size
       max_size     = var.eks_nodes_group_size.max_size
       desired_size = var.eks_nodes_group_size.min_size
-
-      create_launch_template = false
-      launch_template_name = ""
+      
       pre_bootstrap_user_data = <<-EOT
       #!/bin/bash
       set -ex
