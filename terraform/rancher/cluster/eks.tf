@@ -123,7 +123,9 @@ module "eks_cluster" {
       min_size     = var.eks_nodes_group_size.min_size
       max_size     = var.eks_nodes_group_size.max_size
       desired_size = var.eks_nodes_group_size.min_size
-      
+
+      #https://aws.amazon.com/blogs/networking-and-content-delivery/implementing-long-running-tcp-connections-within-vpc-networking/
+      #https://github.com/terraform-aws-modules/terraform-aws-eks/issues/1770
       pre_bootstrap_user_data = <<-EOT
       #!/bin/bash
       set -ex
