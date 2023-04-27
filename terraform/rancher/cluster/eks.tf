@@ -113,6 +113,7 @@ module "eks_cluster" {
       name        = terraform.workspace
       description = "EKS managed node group"
       ami_type    = "AL2_x86_64"
+      ami_id      = data.aws_ami.eks_default.image_id
 
       capacity_type  = var.eks_nodes_type
       disk_size      = 50
@@ -126,16 +127,8 @@ module "eks_cluster" {
 
       #https://aws.amazon.com/blogs/networking-and-content-delivery/implementing-long-running-tcp-connections-within-vpc-networking/
       #https://github.com/terraform-aws-modules/terraform-aws-eks/issues/1770
-      create_launch_template = false
-      pre_bootstrap_user_data = <<-EOT
-      #!/bin/bash
-      set -ex
-      cat <<-EOF > /etc/profile.d/bootstrap.sh
-      export KUBELET_EXTRA_ARGS="--allowed-unsafe-sysctls=net.ipv4.tcp_keepalive_time,net.ipv4.tcp_keepalive_intvl"
-      EOF
-      # Source extra environment variables in bootstrap script
-      sed -i '/^set -o errexit/a\\nsource /etc/profile.d/bootstrap.sh' /etc/eks/bootstrap.sh
-      EOT
+      create_launch_template = true
+      bootstrap_extra_args = "--kubelet-extra-args \"--allowed-unsafe-sysctls=net.ipv4.tcp_keepalive_time,net.ipv4.tcp_keepalive_intvl\""
 
       # For future schedule https://registry.terraform.io/modules/terraform-aws-modules/eks/aws/latest/submodules/eks-managed-node-group#input_schedules
     }
@@ -146,4 +139,14 @@ module "eks_cluster" {
     {
       kubernetes_cluster = terraform.workspace
   })
+}
+
+data "aws_ami" "eks_default" {
+  filter {
+    name   = "name"
+    values = ["amazon-eks-node-1.23-v*"]
+  }
+
+  most_recent = true
+  owners      = ["amazon"]
 }
