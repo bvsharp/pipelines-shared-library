@@ -128,6 +128,7 @@ module "eks_cluster" {
       #https://aws.amazon.com/blogs/networking-and-content-delivery/implementing-long-running-tcp-connections-within-vpc-networking/
       #https://github.com/terraform-aws-modules/terraform-aws-eks/issues/1770
       create_launch_template = true
+      enable_bootstrap_user_data = true
       bootstrap_extra_args = "--kubelet-extra-args \"--allowed-unsafe-sysctls=net.ipv4.tcp_keepalive_time,net.ipv4.tcp_keepalive_intvl\""
 
       # For future schedule https://registry.terraform.io/modules/terraform-aws-modules/eks/aws/latest/submodules/eks-managed-node-group#input_schedules
