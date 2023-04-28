@@ -112,6 +112,24 @@ module "eks_cluster" {
     eks_node_group = {
       name        = terraform.workspace
       description = "EKS managed node group"
+      ami_type    = "AL2_x86_64"
+
+      capacity_type  = var.eks_nodes_type
+      disk_size      = 50
+      instance_types = var.asg_instance_types
+
+      enable_monitoring = false
+
+      min_size     = var.eks_nodes_group_size.min_size
+      max_size     = var.eks_nodes_group_size.max_size
+      desired_size = var.eks_nodes_group_size.min_size
+
+      # For future schedule https://registry.terraform.io/modules/terraform-aws-modules/eks/aws/latest/submodules/eks-managed-node-group#input_schedules
+    }
+
+    eks_node_group_tmp = {
+      name        = "${terraform.workspace}-tmp"
+      description = "EKS managed node group"
       ami_type    = "CUSTOM"
       ami_id      = data.aws_ami.eks_default.image_id
 
