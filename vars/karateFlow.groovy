@@ -36,7 +36,7 @@ def call(params) {
             withMaven(jdk: 'openjdk-17-jenkins-slave-all',
                 maven: 'maven3-jenkins-slave-all',
                 mavenSettingsConfig: 'folioci-maven-settings') {
-                def modules = "mod-source-record-manager"
+                def modules = ""
                 if (params.modules) {
                     modules = "-pl common,testrail-integration," + params.modules
                 }
