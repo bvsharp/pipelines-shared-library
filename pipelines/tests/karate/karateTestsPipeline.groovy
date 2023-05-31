@@ -136,7 +136,6 @@ pipeline {
         stage('Archive artifacts') {
             steps {
                 script {
-                    // archive artifacts for upstream job
                     zip zipFile: "cucumber.zip", glob: "**/target/karate-reports*/*.json"
                     zip zipFile: "junit.zip", glob: "**/target/karate-reports*/*.xml"
                     zip zipFile: "karate-summary.zip", glob: "**/target/karate-reports*/karate-summary-json.txt"
