@@ -3,7 +3,7 @@ package tests.karate
 @Library('pipelines-shared-library@RANCHER-924') _
 
 import org.folio.karate.results.KarateTestsExecutionSummary
-import org.folio.karate.teams.TeamAssignment
+//import org.folio.karate.teams.TeamAssignment
 import org.folio.utilities.Tools
 import org.jenkinsci.plugins.workflow.libs.Library
 
@@ -123,30 +123,30 @@ pipeline {
                             }
                         }
 
-                        stage("Parse teams assignment") {
-                            steps {
-                                script {
-                                    def jsonContents = readJSON file: "teams-assignment.json"
-                                    teamAssignment = new TeamAssignment(jsonContents)
-                                }
-                            }
-                        }
-
-                        stage("Sync jira tickets") {
-                            steps {
-                                script {
-                                    karateTestUtils.syncJiraIssues(karateTestsExecutionSummary, teamAssignment)
-                                }
-                            }
-                        }
-
-                        stage("Send slack notifications") {
-                            steps {
-                                script {
-                                    karateTestUtils.sendSlackNotification(karateTestsExecutionSummary, teamAssignment)
-                                }
-                            }
-                        }
+//                        stage("Parse teams assignment") {
+//                            steps {
+//                                script {
+//                                    def jsonContents = readJSON file: "teams-assignment.json"
+//                                    teamAssignment = new TeamAssignment(jsonContents)
+//                                }
+//                            }
+//                        }
+//
+//                        stage("Sync jira tickets") {
+//                            steps {
+//                                script {
+//                                    karateTestUtils.syncJiraIssues(karateTestsExecutionSummary, teamAssignment)
+//                                }
+//                            }
+//                        }
+//
+//                        stage("Send slack notifications") {
+//                            steps {
+//                                script {
+//                                    karateTestUtils.sendSlackNotification(karateTestsExecutionSummary, teamAssignment)
+//                                }
+//                            }
+//                        }
                     }
                 }
             }
