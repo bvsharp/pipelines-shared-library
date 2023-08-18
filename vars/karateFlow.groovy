@@ -80,8 +80,7 @@ def call(params) {
             def passedTestsCount = 0
             def failedTestsCount = 0
             def totalTestsCount = 0
-
-                files_list.each { test ->
+            files_list.each { test ->
                 def json = readJSON file: test.path
                 def testsFailed = json['scenariosfailed']
                 if (testsFailed != 0 ){ failedTestsCount += testsFailed }
