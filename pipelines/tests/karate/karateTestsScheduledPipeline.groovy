@@ -1,6 +1,6 @@
 package tests.karate
 
-@Library('pipelines-shared-library') _
+@Library('pipelines-shared-library@RANCHER-924') _
 
 import org.folio.karate.results.KarateTestsExecutionSummary
 import org.folio.karate.teams.TeamAssignment
@@ -31,9 +31,9 @@ pipeline {
 
         agent { label 'jenkins-agent-java17' }
 
-        triggers {
-            cron('H 3 * * *')
-        }
+//        triggers {
+//            cron('H 3 * * *')
+//        }
 
         options {
             disableConcurrentBuilds()
