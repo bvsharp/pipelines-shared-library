@@ -3,7 +3,7 @@ package tests.karate
 @Library('pipelines-shared-library@RANCHER-924') _
 
 import org.folio.karate.results.KarateTestsExecutionSummary
-//import org.folio.karate.teams.TeamAssignment
+import org.folio.karate.teams.TeamAssignment
 import org.folio.utilities.Tools
 import org.jenkinsci.plugins.workflow.libs.Library
 
