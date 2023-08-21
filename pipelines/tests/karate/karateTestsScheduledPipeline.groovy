@@ -45,36 +45,36 @@ pipeline {
     }
 
     stages {
-        stage("Check environment") {
-            steps {
-                script {
-            try {
-                def jobParameters = getDestroyEnvironmentJobParameters(clusterName, projectName)
-                tearDownEnvironmentJob = build job: destroyEnvironmentJobName, parameters: jobParameters, wait: true, propagate: false
-            }
-            catch (Exception new_ex){
-                println('Existing env: ' + new_ex)
-            }
-        }
-    }
-}
-
-        stage("Create environment") {
-            steps {
-                script {
-                    def jobParameters = getEnvironmentJobParameters('apply', okapiVersion, clusterName,
-                        projectName, prototypeTenant, folio_repository, folio_branch)
-                        spinUpEnvironmentJob = build job: spinUpEnvironmentJobName, parameters: jobParameters, wait: true, propagate: false
-                }
-            }
-        }
+//        stage("Check environment") {
+//            steps {
+//                script {
+//            try {
+//                def jobParameters = getDestroyEnvironmentJobParameters(clusterName, projectName)
+//                tearDownEnvironmentJob = build job: destroyEnvironmentJobName, parameters: jobParameters, wait: true, propagate: false
+//            }
+//            catch (Exception new_ex){
+//                println('Existing env: ' + new_ex)
+//            }
+//        }
+//    }
+//}
+//
+//        stage("Create environment") {
+//            steps {
+//                script {
+//                    def jobParameters = getEnvironmentJobParameters('apply', okapiVersion, clusterName,
+//                        projectName, prototypeTenant, folio_repository, folio_branch)
+//                        spinUpEnvironmentJob = build job: spinUpEnvironmentJobName, parameters: jobParameters, wait: true, propagate: false
+//                }
+//            }
+//        }
 
         stage("Start tests") {
-            when {
-                expression {
-                    spinUpEnvironmentJob.result == 'SUCCESS'
-                }
-            }
+//            when {
+//                expression {
+//                    spinUpEnvironmentJob.result == 'SUCCESS'
+//                }
+//            }
             steps {
                 script {
                     def jobParameters = [
@@ -98,21 +98,21 @@ pipeline {
 
         stage("Parallel") {
             parallel {
-                stage("Destroy environment") {
-                    steps {
-                        script {
-                            def jobParameters = getDestroyEnvironmentJobParameters(clusterName, projectName)
-                            tearDownEnvironmentJob = build job: destroyEnvironmentJobName, parameters: jobParameters, wait: true, propagate: false
-                        }
-                    }
-                }
+//                stage("Destroy environment") {
+//                    steps {
+//                        script {
+//                            def jobParameters = getDestroyEnvironmentJobParameters(clusterName, projectName)
+//                            tearDownEnvironmentJob = build job: destroyEnvironmentJobName, parameters: jobParameters, wait: true, propagate: false
+//                        }
+//                    }
+//                }
 
                 stage("Collect test results") {
-                    when {
-                        expression {
-                            spinUpEnvironmentJob.result == 'SUCCESS'
-                        }
-                    }
+//                    when {
+//                        expression {
+//                            spinUpEnvironmentJob.result == 'SUCCESS'
+//                        }
+//                    }
                     stages {
                         stage("Collect execution results") {
                             steps {
@@ -153,11 +153,11 @@ pipeline {
         }
 
         stage("Set job execution result") {
-            when {
-                expression {
-                    spinUpEnvironmentJob.result != 'SUCCESS'
-                }
-            }
+//            when {
+//                expression {
+//                    spinUpEnvironmentJob.result != 'SUCCESS'
+//                }
+//            }
             steps {
                 script {
                     currentBuild.result = 'FAILURE'
@@ -166,37 +166,37 @@ pipeline {
         }
     }
     }
-private List getEnvironmentJobParameters(String action, String okapiVersion, clusterName, projectName, tenant,
-                                         folio_repository, folio_branch) {
-    [
-        string(name: 'CLUSTER', value: clusterName),
-        string(name: 'NAMESPACE', value: projectName),
-        string(name: 'FOLIO_BRANCH', value: folio_branch),
-        string(name: 'OKAPI_VERSION', value: okapiVersion),
-        string(name: 'CONFIG_TYPE', value: "testing"),
-        booleanParam(name: 'LOAD_REFERENCE', value: true),
-        booleanParam(name: 'LOAD_SAMPLE', value: true),
-        booleanParam(name: 'CONSORTIA', value: true),
-        booleanParam(name: 'RW_SPLIT', value: true),
-        booleanParam(name: 'GREENMAIL', value: false),
-        string(name: 'POSTGRESQL', value: 'built-in'),
-        string(name: 'KAFKA', value: 'built-in'),
-        string(name: 'OPENSEARCH', value: 'built-in'),
-        string(name: 'S3_BUCKET', value: 'built-in'),
-        string(name: 'MEMBERS', value: ''),
-        string(name: 'AGENT', value: 'rancher'),
-        booleanParam(name: 'REFRESH_PARAMETERS', value: false)
-    ]
-}
-private List getDestroyEnvironmentJobParameters(clusterName, projectName) {
-    [
-        string(name: 'CLUSTER', value: clusterName),
-        string(name: 'NAMESPACE', value: projectName),
-        booleanParam(name: 'RW_SPLIT', value: true),
-        string(name: 'POSTGRESQL', value: 'built-in'),
-        string(name: 'KAFKA', value: 'built-in'),
-        string(name: 'OPENSEARCH', value: 'built-in'),
-        string(name: 'S3_BUCKET', value: 'built-in'),
-        string(name: 'AGENT', value: 'rancher'),
-        booleanParam(name: 'REFRESH_PARAMETERS', value: false)]
-}
+//private List getEnvironmentJobParameters(String action, String okapiVersion, clusterName, projectName, tenant,
+//                                         folio_repository, folio_branch) {
+//    [
+//        string(name: 'CLUSTER', value: clusterName),
+//        string(name: 'NAMESPACE', value: projectName),
+//        string(name: 'FOLIO_BRANCH', value: folio_branch),
+//        string(name: 'OKAPI_VERSION', value: okapiVersion),
+//        string(name: 'CONFIG_TYPE', value: "testing"),
+//        booleanParam(name: 'LOAD_REFERENCE', value: true),
+//        booleanParam(name: 'LOAD_SAMPLE', value: true),
+//        booleanParam(name: 'CONSORTIA', value: true),
+//        booleanParam(name: 'RW_SPLIT', value: true),
+//        booleanParam(name: 'GREENMAIL', value: false),
+//        string(name: 'POSTGRESQL', value: 'built-in'),
+//        string(name: 'KAFKA', value: 'built-in'),
+//        string(name: 'OPENSEARCH', value: 'built-in'),
+//        string(name: 'S3_BUCKET', value: 'built-in'),
+//        string(name: 'MEMBERS', value: ''),
+//        string(name: 'AGENT', value: 'rancher'),
+//        booleanParam(name: 'REFRESH_PARAMETERS', value: false)
+//    ]
+//}
+//private List getDestroyEnvironmentJobParameters(clusterName, projectName) {
+//    [
+//        string(name: 'CLUSTER', value: clusterName),
+//        string(name: 'NAMESPACE', value: projectName),
+//        booleanParam(name: 'RW_SPLIT', value: true),
+//        string(name: 'POSTGRESQL', value: 'built-in'),
+//        string(name: 'KAFKA', value: 'built-in'),
+//        string(name: 'OPENSEARCH', value: 'built-in'),
+//        string(name: 'S3_BUCKET', value: 'built-in'),
+//        string(name: 'AGENT', value: 'rancher'),
+//        booleanParam(name: 'REFRESH_PARAMETERS', value: false)]
+//}
