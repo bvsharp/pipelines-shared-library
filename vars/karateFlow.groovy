@@ -79,17 +79,14 @@ def call(params) {
             def files_list = findFiles( excludes: '', glob: "**/target/karate-reports*/karate-summary-json.txt")
             def passedTestsCount = 0
             def failedTestsCount = 0
-            def totalTestsCount = 0
             files_list.each { test ->
                 def json = readJSON file: test.path
                 def testsFailed = json['scenariosFailed']
-                if (testsFailed != 0 ){ failedTestsCount += testsFailed }
+                if (testsFailed != 0 ) { failedTestsCount += testsFailed }
                 def testsPassed = json['scenariosPassed']
                 if (testsPassed !=0) { passedTestsCount += testsPassed }
-                def totalTests = json['scenariosCount']
-                if (totalTests != 0 ){ totalTestsCount += totalTests }
             }
-//            def totalTestsCount = passedTestsCount + failedTestsCount
+            def totalTestsCount = passedTestsCount + failedTestsCount
             def passRateInDecimal = totalTestsCount > 0 ? (passedTestsCount * 100) / totalTestsCount : 100
             def passRate = passRateInDecimal.intValue()
             if (currentBuild.result == 'FAILURE' || (passRate != null && passRate < 50)) {
