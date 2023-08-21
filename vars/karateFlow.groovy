@@ -72,7 +72,6 @@ def call(params) {
             }
         }
     }
-
     stage('Send in slack test results notifications') {
         script {
             // export and collect karate tests results
@@ -81,7 +80,7 @@ def call(params) {
             def failedTestsCount = 0
             files_list.each { test ->
                 def json = readJSON file: test.path
-                def testsFailed = json['scenariosFailed']
+                def testsFailed = json['scenariosfailed']
                 if (testsFailed != 0 ) { failedTestsCount += testsFailed }
                 def testsPassed = json['scenariosPassed']
                 if (testsPassed !=0) { passedTestsCount += testsPassed }
