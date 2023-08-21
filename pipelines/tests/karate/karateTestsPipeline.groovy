@@ -4,7 +4,7 @@ import groovy.text.SimpleTemplateEngine
 import org.folio.Constants
 import org.jenkinsci.plugins.workflow.libs.Library
 
-@Library('pipelines-shared-library') _
+@Library('pipelines-shared-library@RANCHER-924') _
 
 def karateEnvironment = "folio-testing-karate"
 String clusterName = params.okapiUrl.minus("https://").split("-")[0,1].join("-")
@@ -147,6 +147,33 @@ pipeline {
                         archiveArtifacts allowEmptyArchive: true, artifacts: "karate-summary.zip", fingerprint: true, defaultExcludes: false
                         archiveArtifacts allowEmptyArchive: true, artifacts: "teams-assignment.json", fingerprint: true, defaultExcludes: false
                     }
+                }
+            }
+        }
+        stage('Send in slack test results notifications') {
+            script {
+                // export and collect karate tests results
+                def files_list = findFiles( excludes: '', glob: "**/target/karate-reports*/karate-summary-json.txt")
+                def passedTestsCount = 0
+                def failedTestsCount = 0
+                def totalTestsCount = 0
+                files_list.each { test ->
+                    def json = readJSON file: test.path
+                    def testsFailed = json['scenariosFailed']
+                    if (testsFailed != 0 ){ failedTestsCount += testsFailed }
+                    def testsPassed = json['scenariosPassed']
+                    if (testsPassed !=0) { passedTestsCount += testsPassed }
+                    def totalTests = json['scenariosCount']
+                    if (totalTests != 0 ){ totalTestsCount += totalTests }
+                }
+//            def totalTestsCount = passedTestsCount + failedTestsCount
+                def passRateInDecimal = totalTestsCount > 0 ? (passedTestsCount * 100) / totalTestsCount : 100
+                def passRate = passRateInDecimal.intValue()
+                if (currentBuild.result == 'FAILURE' || (passRate != null && passRate < 50)) {
+                    slackSend(channel: "#rancher_tests_notifications", color: 'danger', message: "Karate tests results: Passed tests: ${passedTestsCount}, Failed tests: ${failedTestsCount}, Pass rate: ${passRate}%")
+                }
+                else {
+                    slackSend(channel: "#rancher_tests_notifications", color: 'good', message: "Karate tests results: Passed tests: ${passedTestsCount}, Failed tests: ${failedTestsCount}, Pass rate: ${passRate}%")
                 }
             }
         }
