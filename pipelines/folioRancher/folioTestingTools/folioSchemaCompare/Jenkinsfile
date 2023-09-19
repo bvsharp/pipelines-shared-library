@@ -6,7 +6,7 @@ import org.folio.rest.GitHubUtility
 import org.folio.Constants
 import groovy.json.JsonSlurperClassic
 
-@Library('pipelines-shared-library@RANCHER-741-Jenkins-Enhancements') _
+@Library('pipelines-shared-library@RANCHER-981') _
 
 properties([
     buildDiscarder(logRotator(numToKeepStr: '20')),
@@ -193,7 +193,7 @@ ansiColor('xterm') {
                 folioSchemaCompareUtils.sendSlackNotification("#${params.SLACK_CHANNEL}")
             }
 
-            stage('Destroy data-migration project') {
+            /*stage('Destroy data-migration project') {
                 def jobParameters = getEnvironmentJobParameters(
                         'destroy',
                          clusterName,
@@ -207,7 +207,7 @@ ansiColor('xterm') {
                          params.BACKUP_NAME)
 
                 build job: Constants.JENKINS_JOB_PROJECT, parameters: jobParameters, wait: true, propagate: false
-            }
+            }*/
 
             stage('Cleanup') {
                 cleanWs notFailBuild: true

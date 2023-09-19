@@ -17,7 +17,7 @@ void getSchemasDifference(rancher_project_name, tenant_id, tenant_id_clean, pgad
                 port     : kubectl.getSecretValue(rancher_project_name, 'db-connect-modules', 'DB_PORT')
             ]
 
-            def teamAssignment = getTeamAssignment()
+            //def teamAssignment = getTeamAssignment()
 
             def atlasPodName = "atlas"
             kubectl.runPodWithCommand(rancher_project_name, atlasPodName, 'arigaio/atlas:0.10.1-alpine')
@@ -72,14 +72,14 @@ void getSchemasDifference(rancher_project_name, tenant_id, tenant_id_clean, pgad
                         println "Schemas are synced, no changes to be made."
                     } else {
                         diff.put(srcValue, currentDiff)
-                        createSchemaDiffJiraIssue(srcValue, currentDiff, resultMap, teamAssignment)
+                        //createSchemaDiffJiraIssue(srcValue, currentDiff, resultMap, teamAssignment)
                     }
                 } catch (exception) {
                     println exception
                     def messageDiff = "Changes were found in this scheme, but cannot be processed. \n" +
                         "Please compare ${srcValue} and ${dstValue} in pgAdmin Schema Diff UI \n"
                     diff.put(srcValue, messageDiff)
-                    createSchemaDiffJiraIssue(srcValue, messageDiff, resultMap, teamAssignment)
+                    //createSchemaDiffJiraIssue(srcValue, messageDiff, resultMap, teamAssignment)
                 }
             }
 
@@ -99,7 +99,7 @@ void getSchemasDifference(rancher_project_name, tenant_id, tenant_id_clean, pgad
 
 // Jira Issue Creation Report
 
-def createSchemaDiffJiraIssue(schemaName, schemaDiff, resultMap, teamAssignment) {
+/*def createSchemaDiffJiraIssue(schemaName, schemaDiff, resultMap, teamAssignment) {
     JiraClient jiraClient = karateTestUtils.getJiraClient()
 
     def moduleName = schemaName.replaceFirst(/^[^_]*_mod_/, "mod_").replace("_", "-")
@@ -146,11 +146,11 @@ def createSchemaDiffJiraIssue(schemaName, schemaDiff, resultMap, teamAssignment)
         println("Unable to create Jira ticket. " + e.getMessage())
         e.printStackTrace()
     }
-}
+} */
 
 
 
-def getIssueDescription(schemaName, schemaDiff, srcVersion, dstVersion) {
+/*def getIssueDescription(schemaName, schemaDiff, srcVersion, dstVersion) {
     def description =
         "*Schema Name:* ${schemaName}\n" +
             "*Schema diff:* ${schemaDiff}\n" +
@@ -161,19 +161,19 @@ def getIssueDescription(schemaName, schemaDiff, srcVersion, dstVersion) {
     description
         .replaceAll("\\{", "&#123;")
         .replaceAll("\\{", "&#125;")
-}
+}*/
 
 
 // get the TeamAssignments
 
-def getTeamAssignment() {
+/*def getTeamAssignment() {
     Tools tools = new Tools(this)
     def assignmentPath = "teams-assignment.json"
     tools.copyResourceFileToWorkspace("dataMigration/$assignmentPath")
     def jsonContents = readJSON file: assignmentPath
     def teamAssignment = new TeamAssignment(jsonContents)
     return teamAssignment
-}
+}*/
 
 
 // Get the tennat list
