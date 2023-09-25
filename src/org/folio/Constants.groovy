@@ -1,5 +1,7 @@
 package org.folio
 
+import java.util.regex.Pattern
+
 class Constants {
     //AWS
     static String AWS_REGION = 'us-west-2'
@@ -229,4 +231,6 @@ class Constants {
     static String DM_ISSUES_JQL = 'labels = dataMigrationSchemaDiff and status != Closed'
 
     static String GLOBAL_BUILD_TIMEOUT = '4'
+
+    static Pattern NAME_VERSION_REGEXP = ~/^([a-z_\-]+)-([\d.]+(?:-SNAPSHOT(?:\.\w+)?|))$/
 }
