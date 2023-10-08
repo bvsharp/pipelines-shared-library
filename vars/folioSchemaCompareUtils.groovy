@@ -17,7 +17,7 @@ void getSchemasDifference(rancher_project_name, tenant_id, tenant_id_clean, pgad
                 port     : kubectl.getSecretValue(rancher_project_name, 'db-connect-modules', 'DB_PORT')
             ]
 
-            def teamAssignment = getTeamAssignment()
+            //def teamAssignment = getTeamAssignment()
 
             def atlasPodName = "atlas"
             kubectl.runPodWithCommand(rancher_project_name, atlasPodName, 'arigaio/atlas:0.10.1-alpine')
