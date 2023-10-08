@@ -62,23 +62,23 @@ void getSchemasDifference(rancher_project_name, tenant_id, tenant_id_clean, pgad
                 diff.put("Unique schemas", "Please check list of unique Schemas:\n $uniqueValues")
             }
 
-            groupedValues.each { srcValue, dstValue ->
+            groupedValues.each {
                 try {
                     def dbConnectionString = "postgres://${psqlConnection.user}:${psqlConnection.password}@${psqlConnection.host}:${psqlConnection.port}/${psqlConnection.db}?sslmode=disable&search_path"
-                    def getDiffCommand = "./atlas schema diff --from '${dbConnectionString}=${srcValue}' --to '${dbConnectionString}=${dstValue}'"
+                    def getDiffCommand = "./atlas schema diff --from '${dbConnectionString}=${it.key}' --to '${dbConnectionString}=${it.value}'"
                     def currentDiff = sh(returnStdout: true, script: "set +x && kubectl exec ${atlasPodName} -n ${rancher_project_name} -- ${getDiffCommand}").trim()
 
                     if (currentDiff == "Schemas are synced, no changes to be made.") {
                         println "Schemas are synced, no changes to be made."
                     } else {
-                        diff.put(srcValue, currentDiff)
+                        diff.put(it.key, currentDiff)
                         //createSchemaDiffJiraIssue(srcValue, currentDiff, resultMap, teamAssignment)
                     }
                 } catch (exception) {
                     println exception
                     def messageDiff = "Changes were found in this scheme, but cannot be processed. \n" +
-                        "Please compare ${srcValue} and ${dstValue} in pgAdmin Schema Diff UI \n"
-                    diff.put(srcValue, messageDiff)
+                        "Please compare ${it.key} and ${it.value} in pgAdmin Schema Diff UI \n"
+                    diff.put(it.key, messageDiff)
                     //createSchemaDiffJiraIssue(srcValue, messageDiff, resultMap, teamAssignment)
                 }
             }
@@ -174,6 +174,7 @@ def getIssueDescription(schemaName, schemaDiff, srcVersion, dstVersion) {
     def teamAssignment = new TeamAssignment(jsonContents)
     return teamAssignment
 }*/
+
 
 
 // Get the tennat list
