@@ -99,7 +99,7 @@ void getSchemasDifference(rancher_project_name, tenant_id, tenant_id_clean, pgad
 
 // Jira Issue Creation Report
 
-def createSchemaDiffJiraIssue(schemaName, schemaDiff, resultMap, teamAssignment) {
+/*def createSchemaDiffJiraIssue(schemaName, schemaDiff, resultMap, teamAssignment) {
     JiraClient jiraClient = karateTestUtils.getJiraClient()
 
     def moduleName = schemaName.replaceFirst(/^[^_]*_mod_/, "mod_").replace("_", "-")
@@ -146,7 +146,7 @@ def createSchemaDiffJiraIssue(schemaName, schemaDiff, resultMap, teamAssignment)
         println("Unable to create Jira ticket. " + e.getMessage())
         e.printStackTrace()
     }
-}
+}*/
 
 
 
@@ -166,14 +166,14 @@ def getIssueDescription(schemaName, schemaDiff, srcVersion, dstVersion) {
 
 // get the TeamAssignments
 
-def getTeamAssignment() {
+/*def getTeamAssignment() {
     Tools tools = new Tools(this)
     def assignmentPath = "teams-assignment.json"
     tools.copyResourceFileToWorkspace("dataMigration/$assignmentPath")
     def jsonContents = readJSON file: assignmentPath
     def teamAssignment = new TeamAssignment(jsonContents)
     return teamAssignment
-}
+}*/
 
 
 // Get the tennat list
