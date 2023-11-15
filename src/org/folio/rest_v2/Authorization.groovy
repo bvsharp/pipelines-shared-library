@@ -186,4 +186,43 @@ class Authorization extends Common {
             throw new RequestException(e.getMessage(), e.statusCode)
         }
     }
+
+    /**
+     * Triggers the action of resetting the password for a user.
+     *
+     * @param tenant The tenant in which the user resides.
+     * @param user The user whose password is to be reset.
+     * @return The ID of the reset password action.
+     */
+    String resetPasswordAction(OkapiTenant tenant, OkapiUser user) {
+        user.checkUuid()
+
+        String url = generateUrl("/authn/password-reset-action")
+        Map<String, String> headers = getAuthorizedHeaders(tenant)
+        Map body = [userId        : user.uuid,
+                    id            : UUID.randomUUID().toString(),
+                    expirationTime: 200]
+
+        logger.info("Reseting password for ${user.username} user...")
+        restClient.post(url, body, headers)
+        return body["id"]
+    }
+
+    /**
+     * Resets the password for a user.
+     *
+     * @param tenant The tenant in which the user resides.
+     * @param user The user whose password is to be reset.
+     */
+    void resetUserPassword(OkapiTenant tenant, OkapiUser user) {
+        user.checkUuid()
+        String url = generateUrl("/authn/reset-password")
+        Map<String, String> headers = getAuthorizedHeaders(tenant)
+        Map body = [passwordResetActionId: resetPasswordAction(tenant, user),
+                    newPassword          : user.password]
+
+        logger.info("Changing password for ${user.username} user...")
+        restClient.post(url, body, headers)
+        logger.info("${user.username} password successfully changed")
+    }
 }
