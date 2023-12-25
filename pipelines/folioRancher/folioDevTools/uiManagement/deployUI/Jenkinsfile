@@ -8,9 +8,9 @@ import org.folio.rest.GitHubUtility
 import org.folio.models.TenantUi
 import org.jenkinsci.plugins.workflow.libs.Library
 
-@Library('pipelines-shared-library@RANCHER-741-Jenkins-Enhancements') _
+@Library('pipelines-shared-library@RANCHER-1146') _
 
-CONFIG_BRANCH = 'RANCHER-741-Jenkins-Enhancements'
+CONFIG_BRANCH = 'RANCHER-1146'
 
 properties([
     buildDiscarder(logRotator(numToKeepStr: '30')),
