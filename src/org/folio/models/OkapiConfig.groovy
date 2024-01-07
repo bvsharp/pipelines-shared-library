@@ -14,6 +14,8 @@ class OkapiConfig {
     /** SMTP configuration object for managing email services. */
     SmtpConfig smtp
 
+    LdpConfig ldpConfig
+
     /**
      * Default constructor for creating an instance of the OkapiConfig class.
      * Initializes resetPasswordLink, kbApiKey, and smtp properties.
@@ -22,6 +24,7 @@ class OkapiConfig {
         this.resetPasswordLink
         this.kbApiKey
         this.smtp
+        this.ldpConfig
     }
 
     /**
@@ -54,6 +57,17 @@ class OkapiConfig {
      */
     OkapiConfig withSmtp(SmtpConfig config) {
         this.smtp = config
+        return this
+    }
+
+    /**
+     * Sets the LDP configuration for the OkapiConfig instance
+     *
+     * @param config
+     * @return
+     */
+    OkapiConfig withLdp(LdpConfig config) {
+        this.ldpConfig = config
         return this
     }
 }

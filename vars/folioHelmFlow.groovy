@@ -1,11 +1,36 @@
 import hudson.AbortException
 import org.folio.Constants
 import org.folio.models.RancherNamespace
+import org.folio.rest_v2.Configurations
+import org.folio.utilities.Tools
 import java.time.LocalDateTime
 
 void deployGreenmail(String namespace) {
-    addHelmRepository(Constants.FOLIO_HELM_HOSTED_REPO_NAME, Constants.FOLIO_HELM_HOSTED_REPO_URL, false)
-    upgrade("greenmail", namespace, '', Constants.FOLIO_HELM_HOSTED_REPO_NAME, "greenmail")
+    folioHelm.addHelmRepository(Constants.FOLIO_HELM_HOSTED_REPO_NAME, Constants.FOLIO_HELM_HOSTED_REPO_URL, false)
+    folioHelm.upgrade("greenmail", namespace, '', Constants.FOLIO_HELM_HOSTED_REPO_NAME, "greenmail")
+}
+
+//TODO Refactor/optimise this function
+void deployLdp(RancherNamespace namespace){
+    Configurations configuration = new Configurations(this, namespace.getDomains()['okapi'], false)
+    Map dbParameters = [:]
+    dbParameters.dbHost = kubectl.getSecretValue(namespace.getNamespaceName(), 'db-connect-modules', 'DB_HOST')
+    dbParameters.dbPort = kubectl.getSecretValue(namespace.getNamespaceName(), 'db-connect-modules', 'DB_PORT')
+    dbParameters.dbName = kubectl.getSecretValue(namespace.getNamespaceName(), 'db-connect-modules', 'DB_DATABASE')
+    dbParameters.dbUsername = kubectl.getSecretValue(namespace.getNamespaceName(), 'db-connect-modules', 'DB_USERNAME')
+    dbParameters.dbPassword = kubectl.getSecretValue(namespace.getNamespaceName(), 'db-connect-modules', 'DB_PASSWORD')
+
+    namespace.getTenants().each {tenantId, tenant->
+        if(tenant?.getOkapiConfig()?.getLdpConfig()){
+            tenant.getOkapiConfig().getLdpConfig().setDbHost(dbParameters.dbHost)
+            configuration.ldpDbSettings(tenant)
+            configuration.ldpSavedQueryRepo(tenant)
+        }
+    }
+
+    kubectl.createConfigMap("ldpconf", namespace.getNamespaceName(), new Tools(this).buildLdpConfigMap(namespace, dbParameters))
+    folioHelm.addHelmRepository(Constants.FOLIO_HELM_V2_REPO_NAME, Constants.FOLIO_HELM_V2_REPO_URL, true)
+    folioHelm.upgrade("ldp-server", namespace.getNamespaceName(), '', Constants.FOLIO_HELM_V2_REPO_NAME, "ldp-server")
 }
 
 void deployMockServer(RancherNamespace ns) {

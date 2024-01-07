@@ -2,6 +2,7 @@
 import org.folio.Constants
 import org.folio.models.Index
 import org.folio.models.InstallRequestParams
+import org.folio.models.LdpConfig
 import org.folio.models.OkapiTenantConsortia
 import org.folio.models.RancherNamespace
 import org.folio.models.TenantUi
@@ -203,7 +204,9 @@ ansiColor('xterm') {
       }
 
       stage('Deploy ldp') {
-        println('LDP deployment')
+        folioHelm.withKubeConfig(namespace.getClusterName()) {
+            folioHelmFlow.deployLdp(namespace)
+        }
       }
     } catch (e) {
       println "Caught exception: ${e}"

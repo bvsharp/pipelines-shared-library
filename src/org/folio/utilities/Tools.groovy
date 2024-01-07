@@ -4,10 +4,8 @@ import com.cloudbees.groovy.cps.NonCPS
 import groovy.json.JsonSlurperClassic
 import groovy.text.GStringTemplateEngine
 import org.folio.Constants
-import org.folio.rest.model.LdpConfig
-import org.folio.rest.model.OkapiTenant
-import org.folio.rest.model.OkapiUser
-import org.folio.utilities.model.Project
+import org.folio.models.OkapiTenant
+import org.folio.models.RancherNamespace
 
 class Tools {
     Object steps
@@ -90,32 +88,36 @@ class Tools {
         logger.info("Created file in ${filePathName}")
     }
 
-    String build_ldp_setting_json(Project project_config, OkapiUser admin_user, String template_name, LdpConfig ldpConfig,
-                                  db_host, folio_db_name, folio_db_user, folio_db_password) {
-        def binding = [
-            tenant_id             : project_config.getTenant().getId(),
-            tenant_admin_user     : admin_user.getUsername(),
-            tenant_admin_password : admin_user.getPassword(),
-            okapi_url             : "https://${project_config.getDomains().okapi}",
-            deployment_environment: project_config.getConfigType(),
-            db_host               : db_host,
-            db_port               : 5432,
-            folio_db_name         : folio_db_name,
-            folio_db_user         : folio_db_user,
-            folio_db_password     : folio_db_password,
-            ldp_db_name           : ldpConfig.getLdp_db_name(),
-            ldp_db_user_name      : ldpConfig.getLdp_db_user_name(),
-            ldp_db_user_password  : ldpConfig.getLdp_db_user_password(),
-            sqconfig_repo_name    : ldpConfig.getSqconfig_repo_name(),
-            sqconfig_repo_owner   : ldpConfig.getSqconfig_repo_owner(),
-            sqconfig_repo_token   : ldpConfig.getSqconfig_repo_token()
-        ]
-
-        this.copyResourceFileToWorkspace("okapi/configurations/" + template_name)
-        def content = steps.readFile template_name
-        String body = new GStringTemplateEngine().createTemplate(content).make(binding).toString()
-        return body
-
+    String buildLdpConfigMap(RancherNamespace namespace, Map dbParameters) {
+        String templateName = 'ldp_ldpconf.json.template'
+        String tenantId = namespace.defaultTenantId
+        OkapiTenant tenant = namespace.tenants[tenantId]
+        if (tenant?.getOkapiConfig()?.getLdpConfig()) {
+            Map binding = [
+                tenant_id             : tenantId,
+                tenant_admin_user     : tenant.adminUser.username,
+                tenant_admin_password : tenant.adminUser.password,
+                okapi_url             : namespace.getDomains()['okapi'],
+                deployment_environment: "${namespace.getClusterName()}-${namespace.getNamespaceName()}",
+                db_host               : dbParameters.dbHost,
+                db_port               : dbParameters.dbPort,
+                folio_db_name         : dbParameters.dbName,
+                folio_db_user         : dbParameters.dbUsername,
+                folio_db_password     : dbParameters.dbPassword,
+                ldp_db_name           : tenant.okapiConfig.ldpConfig.ldpDbName,
+                ldp_db_user_name      : tenant.okapiConfig.ldpConfig.ldpDbUserName,
+                ldp_db_user_password  : tenant.okapiConfig.ldpConfig.ldpDbUserPassword,
+                sqconfig_repo_name    : tenant.okapiConfig.ldpConfig.sqconfigRepoName,
+                sqconfig_repo_owner   : tenant.okapiConfig.ldpConfig.sqconfigRepoOwner,
+                sqconfig_repo_token   : tenant.okapiConfig.ldpConfig.sqconfigRepoToken
+            ]
+            this.copyResourceFileToWorkspace("okapi/configurations/" + templateName)
+            def content = steps.readFile templateName
+            String body = new GStringTemplateEngine().createTemplate(content).make(binding).toString()
+            createFileFromString('ldpconf.json', body)
+            return './ldpconf.json'
+        } else {
+            throw new Exception("LDP config not found for tenant '${tenantId}'")
+        }
     }
-
 }

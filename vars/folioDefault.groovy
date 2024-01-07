@@ -6,6 +6,7 @@ import org.folio.models.OkapiTenant
 import org.folio.models.OkapiTenantConsortia
 import org.folio.models.OkapiUser
 import org.folio.models.OkapiConfig
+import org.folio.models.LdpConfig
 
 OkapiUser adminOkapiUser(String username, def password) {
     return new OkapiUser(username, password)
@@ -18,7 +19,27 @@ OkapiUser adminOkapiUser(String username, def password) {
         .withType("staff")
 }
 
+LdpConfig ldpConfig(String ldpDbUserPassword) {
+    String ldpQueriesGhToken = ''
+    withCredentials([string(credentialsId: 'ldp_queries_gh_token', variable: 'LDP_QUERIES_GH_TOKEN')]) {
+        ldpQueriesGhToken = LDP_QUERIES_GH_TOKEN
+    }
+    return new LdpConfig(
+        ldpDbName: 'ldp',
+        ldpDbUserName: 'ldpadmin',
+        ldpDbUserPassword: ldpDbUserPassword,
+        ldpadminDbUserName: 'ldpadmin',
+        ldpadminDbUserPassword: ldpDbUserPassword,
+        ldpconfigDbUserName: 'ldpconfig',
+        ldpconfigDbUserPassword: ldpDbUserPassword,
+        sqconfigRepoName: 'ldp-queries',
+        sqconfigRepoOwner: 'RandomOtherGuy',
+        sqconfigRepoToken: ldpQueriesGhToken
+    )
+}
+
 Map<String, OkapiTenantConsortia> consortiaTenants(Object installJson, InstallRequestParams installQueryParameters = new InstallRequestParams()) {
+    LdpConfig ldpConfig = ldpConfig(Constants.PG_LDP_DEFAULT_PASSWORD)
     SmtpConfig smtp = null
     String kbApiKey = ''
     withCredentials([[$class           : 'AmazonWebServicesCredentialsBinding',
@@ -40,7 +61,7 @@ Map<String, OkapiTenantConsortia> consortiaTenants(Object installJson, InstallRe
             .withInstallJson(installJson.collect())
             .withIndex(new Index(true, true))
             .withInstallRequestParams(installQueryParameters.clone())
-            .withConfiguration(new OkapiConfig().withSmtp(smtp).withKbApiKey(kbApiKey)),
+            .withConfiguration(new OkapiConfig().withSmtp(smtp).withKbApiKey(kbApiKey).withLdp(ldpConfig)),
         university: new OkapiTenantConsortia('university')
             .withTenantName('University')
             .withTenantDescription('University (created via Jenkins)')
@@ -63,6 +84,7 @@ Map<String, OkapiTenantConsortia> consortiaTenants(Object installJson, InstallRe
 }
 
 Map<String, OkapiTenant> tenants() {
+    LdpConfig ldpConfig = ldpConfig(Constants.PG_LDP_DEFAULT_PASSWORD)
     SmtpConfig smtp = null
     String kbApiKey = ''
     withCredentials([[$class           : 'AmazonWebServicesCredentialsBinding',
@@ -78,17 +100,17 @@ Map<String, OkapiTenant> tenants() {
             .withTenantName('Datalogisk Institut')
             .withTenantDescription('Danish Library Technology Institute')
             .withAdminUser(adminOkapiUser('diku_admin', 'admin'))
-            .withConfiguration(new OkapiConfig().withSmtp(smtp).withKbApiKey(kbApiKey)),
+            .withConfiguration(new OkapiConfig().withSmtp(smtp).withKbApiKey(kbApiKey).withLdp(ldpConfig)),
         aqa            : new OkapiTenant('aqa')
             .withTenantName('AQA')
             .withTenantDescription('AQA (created via Jenkins)')
             .withAdminUser(adminOkapiUser('aqa_admin', 'admin'))
-            .withConfiguration(new OkapiConfig().withSmtp(smtp).withKbApiKey(kbApiKey)),
+            .withConfiguration(new OkapiConfig().withSmtp(smtp).withKbApiKey(kbApiKey).withLdp(ldpConfig)),
         qa             : new OkapiTenant('qa')
             .withTenantName('QA')
             .withTenantDescription('QA (created via Jenkins)')
             .withAdminUser(adminOkapiUser('aqa_admin', 'admin'))
-            .withConfiguration(new OkapiConfig().withSmtp(smtp).withKbApiKey(kbApiKey)),
+            .withConfiguration(new OkapiConfig().withSmtp(smtp).withKbApiKey(kbApiKey).withLdp(ldpConfig)),
         fs09000000     : new OkapiTenant('fs09000000')
             .withTenantName('Bug Fest')
             .withTenantDescription('fs09000000 bug-fest created via Jenkins')

@@ -25,7 +25,9 @@ class Constants {
                         "email_smtp_host.json.template",
                         "email_smtp_port.json.template",
                         "email_username.json.template"],
-        resetPassword: ["usersbl_reset.json.template"]
+        resetPassword: ["usersbl_reset.json.template"],
+        ldpDbSettings: ["ldp_db_info.json.template"],
+        ldpSavedQueryRepo: ["ldp_sqconfig.json.template"]
     ]
 
     public static final Map WORLDCAT = [

@@ -161,4 +161,42 @@ class Configurations extends Authorization {
             }
         }
     }
+
+    void ldpDbSettings(OkapiTenant tenant){
+        String url = generateUrl("/ldp/config/dbinfo")
+        Map<String, String> headers = getAuthorizedHeaders(tenant)
+
+        Map binding = [
+            tenant_id: tenant.tenantId,
+            db_host: tenant.okapiConfig.ldpConfig.dbHost,
+            ldp_db_name: tenant.okapiConfig.ldpConfig.ldpDbName,
+            ldp_db_user_name: tenant.okapiConfig.ldpConfig.ldpDbUserName,
+            ldp_db_user_password: tenant.okapiConfig.ldpConfig.ldpDbUserPassword]
+
+        Constants.CONFIGURATIONS.ldpDbSettings.each {
+            tools.copyResourceFileToWorkspace("okapi/configurations/" + it)
+            def content = steps.readFile it
+            String body = new GStringTemplateEngine().createTemplate(content).make(binding).toString()
+
+            restClient.put(url, body, headers)
+        }
+    }
+
+    void ldpSavedQueryRepo(OkapiTenant tenant){
+        String url = generateUrl("/ldp/config/sqconfig")
+        Map<String, String> headers = getAuthorizedHeaders(tenant)
+
+        Map binding = [tenant_id: tenant.tenantId,
+                       sqconfig_repo_name: tenant.okapiConfig.ldpConfig.sqconfigRepoName,
+                       sqconfig_repo_owner: tenant.okapiConfig.ldpConfig.sqconfigRepoOwner,
+                       sqconfig_repo_token: tenant.okapiConfig.ldpConfig.sqconfigRepoToken]
+
+        Constants.CONFIGURATIONS.ldpSavedQueryRepo.each {
+            tools.copyResourceFileToWorkspace("okapi/configurations/" + it)
+            def content = steps.readFile it
+            String body = new GStringTemplateEngine().createTemplate(content).make(binding).toString()
+
+            restClient.put(url, body, headers)
+        }
+    }
 }
