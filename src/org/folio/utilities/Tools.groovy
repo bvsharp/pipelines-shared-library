@@ -98,7 +98,7 @@ class Tools {
                 tenant_admin_user     : tenant.adminUser.username,
                 tenant_admin_password : tenant.adminUser.password,
                 okapi_url             : namespace.getDomains()['okapi'],
-                deployment_environment: "${namespace.getClusterName()}-${namespace.getNamespaceName()}",
+                deployment_environment: 'staging',
                 db_host               : dbParameters.dbHost,
                 db_port               : dbParameters.dbPort,
                 folio_db_name         : dbParameters.dbName,
