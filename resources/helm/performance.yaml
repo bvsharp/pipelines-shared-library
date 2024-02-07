@@ -64,6 +64,30 @@ edge-courses:
       memory: '192Mi'
   service:
     type: NodePort
+edge-dcb:
+  ingress:
+    annotations:
+      alb.ingress.kubernetes.io/healthcheck-path: /admin/health
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/success-codes: 200-399
+      kubernetes.io/ingress.class: alb
+    enabled: true
+    hosts:
+      - paths:
+          - /dcbService*
+  javaArgs: ''
+  javaOptions: '-XX:MaxRAMPercentage=75.0 -Drequest_timeout_ms=7200000 -Dokapi_url=http://$(OKAPI_HOST):$(OKAPI_PORT) -Dsecure_store_props=/etc/edge/edge-dcb-ephemeral-properties'
+  postJob:
+    enabled: false
+  replicaCount: 1
+  resources:
+    limits:
+      memory: '320Mi'
+    requests:
+      memory: '256Mi'
+  service:
+    type: NodePort
 edge-dematic:
   ingress:
     annotations:
@@ -323,16 +347,19 @@ mod-calendar:
       memory: '375Mi'
     requests:
       memory: '300Mi'
-mod-circulation:
-  javaOptions: '-XX:MaxRAMPercentage=75.0'
-  postJob:
-    enabled: false
+mod-dcb:
+  extraEnvVars: []
+  integrations:
+      db:
+        enabled: true
+        existingSecret: db-credentials
+  integrations: {}
   replicaCount: 1
   resources:
     limits:
-      memory: '1280Mi'
+      memory: 427Mi
     requests:
-      memory: '1024Mi'
+      memory: 341Mi
 mod-circulation-storage:
   javaOptions: '-XX:MaxRAMPercentage=75.0'
   postJob:
@@ -806,6 +833,42 @@ mod-orders-storage:
       memory: '427Mi'
     requests:
       memory: '341Mi'
+mod-dcb:
+  javaOptions: '-XX:MaxRAMPercentage=75.0'
+  extraEnvVars:
+  - name: consumer.verticle.mandatory
+    value: 'false'
+  integrations:
+    db:
+      enabled: true
+      existingSecret: db-credentials
+    kafka:
+      enabled: true
+      existingSecret: kafka-credentials
+    systemuser:
+      enabled: true
+      existingSecret: mod-dcb-systemuser
+  replicaCount: 1
+  resources:
+    limits:
+      memory: 427Mi
+    requests:
+      memory: 341Mi
+mod-circulation-item:
+  javaOptions: '-XX:MaxRAMPercentage=75.0'
+  extraEnvVars:
+  - name: consumer.verticle.mandatory
+    value: 'false'
+  integrations:
+    db:
+      enabled: true
+      existingSecret: db-credentials
+  replicaCount: 1
+  resources:
+    limits:
+      memory: 427Mi
+    requests:
+      memory: 341Mi
 mod-organizations:
   javaOptions: '-XX:MaxRAMPercentage=75.0'
   postJob:
