@@ -2,8 +2,8 @@
 import org.jenkinsci.plugins.workflow.libs.Library
 import org.folio.rest.model.DataMigrationTenant
 import java.time.*
-import org.folio.rest.GitHubUtility
-import org.folio.Constants
+// import org.folio.rest.GitHubUtility
+// import org.folio.Constants
 import groovy.json.JsonSlurperClassic
 
 @Library('pipelines-shared-library@RANCHER-1223') _
@@ -63,8 +63,6 @@ ansiColor('xterm') {
                     adminPassword = 'diku_admin'
                     buildName tenantId + '.' + 'without-restore' + '.' + env.BUILD_ID
                 }
-
-
             }
 
           // stage('Destroy data-migration project') {
@@ -156,7 +154,6 @@ ansiColor('xterm') {
               modulesLongMigrationTimeSlack += result[1]
               modulesMigrationFailedSlack += result[2]
             }
-
 
 
         } catch (exception) {
