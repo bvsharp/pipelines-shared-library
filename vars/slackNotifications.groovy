@@ -21,7 +21,11 @@ def renderSlackMessage(String testName, buildStatus, testsStatus, message, modul
         SUCCESS: libraryResource("slackNotificationsTemplates/cypressTemplates/successTemplate"),
         FAILED: libraryResource("slackNotificationsTemplates/cypressTemplates/failureTemplate")
     ]
-
+    Map schemaComparison = [
+      SUCCESS: libraryResource("slackNotificationsTemplates/schemaComparison/successTemplate"),
+      FAILED: libraryResource("slackNotificationsTemplates/schemaComparison/failureTemplate")
+   ]
+//do we need pass rate? remade calculation based on 90% jf passing to 97.3
     if (message.contains("Pass rate:")){
         def passRate = (message =~ /Pass rate: (\d+)%/)?.getAt(0)?.getAt(1)?.toInteger()
         testsStatus = passRate > 50 ? "SUCCESS" : "FAILED"
@@ -78,7 +82,8 @@ def renderSlackMessage(String testName, buildStatus, testsStatus, message, modul
             }
 
             def testsTemplate = testName == "karate" ? karateTemplates[testsStatus] :
-                                testName == "cypress" ? cypressTemplates[testsStatus] : null
+                                testName == "cypress" ? cypressTemplates[testsStatus] :
+                                testName == "schemaComparison" ? cypressTemplates[testsStatus] : null
 
             def messageLines = message.tokenize("\n")
             message = messageLines.join("\\n")
@@ -171,6 +176,11 @@ void sendCypressSlackNotification(message, channel, buildStatus) {
     def attachments = renderSlackMessage("cypress", buildStatus, "", message)
     slackSend(attachments: attachments, channel: channel)
 }
+
+void sendShemaComparisonSlackNotification(message, channel, buildStatus) {
+  def attachments = renderSlackMessage("schemaComparison", buildStatus, "", message)
+  slackSend(attachments: attachments, channel: channel)
+}git 
 
 void sendPipelineFailSlackNotification(channel) {
     def attachments = renderSlackMessage("", "FAILED", "", "")
