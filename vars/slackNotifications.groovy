@@ -83,7 +83,7 @@ def renderSlackMessage(String testName, buildStatus, testsStatus, message, modul
 
             def testsTemplate = testName == "karate" ? karateTemplates[testsStatus] :
                                 testName == "cypress" ? cypressTemplates[testsStatus] :
-                                testName == "schemaComparison" ? cypressTemplates[testsStatus] : null
+                                testName == "comparison" ? schemaComparison[testsStatus] : null
 
             def messageLines = message.tokenize("\n")
             message = messageLines.join("\\n")
@@ -177,8 +177,8 @@ void sendCypressSlackNotification(message, channel, buildStatus) {
     slackSend(attachments: attachments, channel: channel)
 }
 
-void sendShemaComparisonSlackNotification(message, channel, buildStatus) {
-    def attachments = renderSlackMessage("schemaComparison", buildStatus, "", message)
+void sendSchemaComparisonSlackNotification(message, channel, buildStatus) {
+    def attachments = renderSlackMessage("comparison", buildStatus, "", message)
     slackSend(attachments: attachments, channel: channel)
 }
 

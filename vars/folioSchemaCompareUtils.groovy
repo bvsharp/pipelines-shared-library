@@ -200,7 +200,7 @@ void sendSlackNotification(String slackChannel) {
 
     try {
         //slackSend(color: '', message: message, channel: slackChannel)
-        slackNotifications.sendShemaComparisonSlackNotification('test',"#folioschemacompare", currentBuild.result)
+        slackNotifications.sendSchemaComparisonSlackNotification("test","#folioschemacompare", currentBuild.result)
     } catch (Exception e) {
         println("Unable to send slack notification to channel '${slackChannel}'")
         e.printStackTrace()
