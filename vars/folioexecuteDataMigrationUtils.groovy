@@ -12,26 +12,15 @@ import org.folio.client.jira.JiraClient
 import org.folio.client.jira.model.JiraIssue
 import org.folio.karate.teams.TeamAssignment
 
-def getMigrationTime(rancher_cluster_name,rancher_project_name,resultMap,srcInstallJson,dstInstallJson,totalTimeInMs,modulesLongMigrationTimeSlack,modulesMigrationFailedSlack,startMigrationTime,pgadminURL){
+def getMigrationTime(rancher_cluster_name,rancher_project_name,resultMap,srcJsonObj,dstJsonObj,totalTimeInMs,modulesLongMigrationTimeSlack,modulesMigrationFailedSlack,startMigrationTime,pgadminURL){
 
 
-    srcInstallJson.each { item ->
+    srcJsonObj.each { item ->
         def (fullModuleName, moduleName, moduleVersion) = (item.id =~ /^(.*)-(\d*\.\d*\.\d*.*)$/)[0]
         resultMap[moduleName] = [srcVersion: moduleVersion]
     }
 
-    // srcInstallJson.each { item ->
-    //     if (item instanceof Map && item.containsKey('id')) {
-    //         def (fullModuleName, moduleName, moduleVersion) = (item.id =~ /^(.*)-(\d*\.\d*\.\d*.*)$/)[0]
-    //         resultMap[moduleName] = [srcVersion: moduleVersion]
-    //     } else {
-    //         // Handle cases where item does not have an 'id' property
-    //         println "Invalid item: $item"
-    //     }
-    // }
-
-
-    dstInstallJson.each { item ->
+    dstJsonObj.each { item ->
         def (fullModuleName, moduleName, moduleVersion) = (item.id =~ /^(.*)-(\d*\.\d*\.\d*.*)$/)[0]
         if (!resultMap.containsKey(moduleName)) {
             // Create an empty map if it doesn't exist
