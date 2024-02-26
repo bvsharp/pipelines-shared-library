@@ -15,10 +15,21 @@ import org.folio.karate.teams.TeamAssignment
 def getMigrationTime(rancher_cluster_name,rancher_project_name,resultMap,srcInstallJson,dstInstallJson,totalTimeInMs,modulesLongMigrationTimeSlack,modulesMigrationFailedSlack,startMigrationTime,pgadminURL){
 
 
+    // srcInstallJson.each { item ->
+    //     def (fullModuleName, moduleName, moduleVersion) = (item.id =~ /^(.*)-(\d*\.\d*\.\d*.*)$/)[0]
+    //     resultMap[moduleName] = [srcVersion: moduleVersion]
+    // }
+
     srcInstallJson.each { item ->
-        def (fullModuleName, moduleName, moduleVersion) = (item.id =~ /^(.*)-(\d*\.\d*\.\d*.*)$/)[0]
-        resultMap[moduleName] = [srcVersion: moduleVersion]
+        if (item instanceof Map && item.containsKey('id')) {
+            def (fullModuleName, moduleName, moduleVersion) = (item.id =~ /^(.*)-(\d*\.\d*\.\d*.*)$/)[0]
+            resultMap[moduleName] = [srcVersion: moduleVersion]
+        } else {
+            // Handle cases where item does not have an 'id' property
+            println "Invalid item: $item"
+        }
     }
+
 
     dstInstallJson.each { item ->
         def (fullModuleName, moduleName, moduleVersion) = (item.id =~ /^(.*)-(\d*\.\d*\.\d*.*)$/)[0]
