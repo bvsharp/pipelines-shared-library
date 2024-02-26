@@ -180,7 +180,7 @@ void sendCypressSlackNotification(message, channel, buildStatus) {
 void sendShemaComparisonSlackNotification(message, channel, buildStatus) {
   def attachments = renderSlackMessage("schemaComparison", buildStatus, "", message)
   slackSend(attachments: attachments, channel: channel)
-}git
+}
 
 void sendPipelineFailSlackNotification(channel) {
     def attachments = renderSlackMessage("", "FAILED", "", "")
