@@ -61,6 +61,7 @@ def getMigrationTime(rancher_cluster_name,rancher_project_name,resultMap,srcJson
 
     // Grouped modules by tenant name and generate HTML report
     def uniqTenants = tenants.tenantName.unique()
+    println(uniqTenants)
     uniqTenants.each { tenantName ->
         (htmlData, totalTime, modulesLongMigrationTime, modulesMigrationFailed) = createTimeHtmlReport(tenantName, tenants, pgadminURL)
         totalTimeInMs += totalTime
@@ -68,6 +69,7 @@ def getMigrationTime(rancher_cluster_name,rancher_project_name,resultMap,srcJson
         modulesMigrationFailedSlack += modulesMigrationFailed
         writeFile file: "reportTime/${tenantName}.html", text: htmlData
     }
+    input "pause"
     return [totalTimeInMs, modulesLongMigrationTimeSlack, modulesMigrationFailedSlack]
 
 }
