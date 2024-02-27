@@ -179,7 +179,11 @@ void sendCypressSlackNotification(message, channel, buildStatus) {
 
 void sendSchemaComparisonSlackNotification(message, channel, buildStatus) {
     def attachments = renderSlackMessage("comparison", buildStatus, "", message)
-    slackSend(attachments: attachments, channel: channel)
+    if (attachments) {
+      slackSend(attachments: attachments, channel: channel)
+    } else {
+      println("Attachments are null. Skipping Slack notification.")
+  }
 }
 
 void sendPipelineFailSlackNotification(channel) {
