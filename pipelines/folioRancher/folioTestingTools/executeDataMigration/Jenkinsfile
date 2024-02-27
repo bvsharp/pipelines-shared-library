@@ -37,6 +37,8 @@ List modulesMigrationFailedSlack = []
 def resultMap = [:]
 String okapiVersion = folioTools.eval(folioStringScripts.getOkapiVersions(), ['FOLIO_BRANCH': params.FOLIO_BRANCH_SRC])[0]
 
+input "stop"
+
 println("LOCALTIME: ${LocalDateTime.now()}")
 // def srcInstallJson = new GitHubUtility(this).getEnableList(params.FOLIO_REPOSITORY, params.FOLIO_BRANCH_SRC)
 // def dstInstallJson = new GitHubUtility(this).getEnableList(params.FOLIO_REPOSITORY, params.FOLIO_BRANCH_DST)
