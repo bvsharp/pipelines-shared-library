@@ -33,6 +33,7 @@ def getMigrationTime(rancher_cluster_name,rancher_project_name,resultMap,srcJson
 
     // Get logs about activating modules from elasticseach
     def result = getESLogs(rancher_cluster_name, "logstash-$rancher_project_name", startMigrationTime)
+    println("RESULT: ${result}")
 
     // Create tenants map with information about each module: moduleName, moduleVersionDst, moduleVersionSrc and migration time
     def tenants = []
@@ -59,7 +60,7 @@ def getMigrationTime(rancher_cluster_name,rancher_project_name,resultMap,srcJson
             tenants += new DataMigrationTenant(bindingMap)
         }
     }
-
+    println("TENANTS: ${tenants}")
     // Grouped modules by tenant name and generate HTML report
     def uniqTenants = tenants.tenantName.unique()
     println("UNIQUE: ${uniqTenants}")
