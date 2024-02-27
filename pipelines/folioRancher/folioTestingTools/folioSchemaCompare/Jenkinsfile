@@ -130,19 +130,19 @@ ansiColor('xterm') {
                 }
             }
 
-            stage('Update with dst release versions') {
-                build job: Constants.JENKINS_JOB_BACKEND_MODULES_DEPLOY_BRANCH,
-                    parameters: [
-                        string(name: 'folio_repository', value: params.FOLIO_REPOSITORY),
-                        string(name: 'folio_branch', value: params.FOLIO_BRANCH_DST),
-                        string(name: 'rancher_cluster_name', value: clusterName),
-                        string(name: 'rancher_project_name', value: projectName),
-                        string(name: 'config_type', value: configType),
-                        string(name: 'tenant_id', value: tenantId),
-                        string(name: 'admin_username', value: adminUsername),
-                        string(name: 'admin_password', value: adminPassword)
-                    ]
-            }
+//            stage('Update with dst release versions') {
+//                build job: Constants.JENKINS_JOB_BACKEND_MODULES_DEPLOY_BRANCH,
+//                    parameters: [
+//                        string(name: 'folio_repository', value: params.FOLIO_REPOSITORY),
+//                        string(name: 'folio_branch', value: params.FOLIO_BRANCH_DST),
+//                        string(name: 'rancher_cluster_name', value: clusterName),
+//                        string(name: 'rancher_project_name', value: projectName),
+//                        string(name: 'config_type', value: configType),
+//                        string(name: 'tenant_id', value: tenantId),
+//                        string(name: 'admin_username', value: adminUsername),
+//                        string(name: 'admin_password', value: adminPassword)
+//                    ]
+//            }
 
             stage('Create clean tenant') {
                 build job: Constants.JENKINS_JOB_CREATE_TENANT,
@@ -178,16 +178,16 @@ ansiColor('xterm') {
             currentBuild.result = 'FAILURE'
             error(exception.getMessage())
         } finally {
-//            stage('Publish HTML Reports') {
-//                publishHTML([
-//                    reportDir: 'reportSchemas',
-//                    reportFiles: '*.html',
-//                    reportName: 'Schemas Diff',
-//                    allowMissing: true,
-//                    alwaysLinkToLastBuild: true,
-//                    keepAll: true ])
-//
-//            }
+            stage('Publish HTML Reports') {
+                publishHTML([
+                    reportDir: 'reportSchemas',
+                    reportFiles: '*.html',
+                    reportName: 'Schemas Diff',
+                    allowMissing: true,
+                    alwaysLinkToLastBuild: true,
+                    keepAll: true ])
+
+            }
 
             stage('Send Slack notification') {
                 //folioSchemaCompareUtils.sendSlackNotification("#${params.SLACK_CHANNEL}")
