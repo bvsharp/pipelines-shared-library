@@ -30,7 +30,8 @@ def configType = 'performance'
 def tenantId
 def adminUsername
 def adminPassword
-def startMigrationTime = LocalDateTime.now()
+// def startMigrationTime = LocalDateTime.now()
+def startMigrationTime = '2024-02-23T15:02:47.785'
 Integer totalTimeInMs = 0
 LinkedHashMap modulesLongMigrationTimeSlack = [:]
 List modulesMigrationFailedSlack = []

@@ -29,8 +29,9 @@ def getMigrationTime(rancher_cluster_name,rancher_project_name,resultMap,srcJson
         resultMap[moduleName]['dstVersion'] = moduleVersion
     }
     println("DESTINATION: ${dstJsonObj}")
+    println("STARTTIME: ${startMigrationTime}")
 
-
+    
     // Get logs about activating modules from elasticseach
     def result = getESLogs(rancher_cluster_name, "logstash-$rancher_project_name", startMigrationTime)
     println("RESULT: ${result}")
