@@ -19,7 +19,7 @@ def getMigrationTime(rancher_cluster_name,rancher_project_name,resultMap,srcJson
         def (fullModuleName, moduleName, moduleVersion) = (item.id =~ /^(.*)-(\d*\.\d*\.\d*.*)$/)[0]
         resultMap[moduleName] = [srcVersion: moduleVersion]
     }
-    println(srcJsonObj)
+    println("SOURCE: ${srcJsonObj}")
     dstJsonObj.each { item ->
         def (fullModuleName, moduleName, moduleVersion) = (item.id =~ /^(.*)-(\d*\.\d*\.\d*.*)$/)[0]
         if (!resultMap.containsKey(moduleName)) {
@@ -28,12 +28,11 @@ def getMigrationTime(rancher_cluster_name,rancher_project_name,resultMap,srcJson
         }
         resultMap[moduleName]['dstVersion'] = moduleVersion
     }
-    println(dstJsonObj)
+    println("DESTINATION: ${dstJsonObj}")
 
 
     // Get logs about activating modules from elasticseach
     def result = getESLogs(rancher_cluster_name, "logstash-$rancher_project_name", startMigrationTime)
-    println(result)
 
     // Create tenants map with information about each module: moduleName, moduleVersionDst, moduleVersionSrc and migration time
     def tenants = []
@@ -63,7 +62,7 @@ def getMigrationTime(rancher_cluster_name,rancher_project_name,resultMap,srcJson
 
     // Grouped modules by tenant name and generate HTML report
     def uniqTenants = tenants.tenantName.unique()
-    println(uniqTenants)
+    println("UNIQUE: ${uniqTenants}")
     uniqTenants.each { tenantName ->
         (htmlData, totalTime, modulesLongMigrationTime, modulesMigrationFailed) = createTimeHtmlReport(tenantName, tenants, pgadminURL)
         totalTimeInMs += totalTime
@@ -71,7 +70,6 @@ def getMigrationTime(rancher_cluster_name,rancher_project_name,resultMap,srcJson
         modulesMigrationFailedSlack += modulesMigrationFailed
         writeFile file: "reportTime/${tenantName}.html", text: htmlData
     }
-    input "pause"
     return [totalTimeInMs, modulesLongMigrationTimeSlack, modulesMigrationFailedSlack]
 
 }
