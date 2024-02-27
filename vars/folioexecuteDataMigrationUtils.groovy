@@ -19,7 +19,7 @@ def getMigrationTime(rancher_cluster_name,rancher_project_name,resultMap,srcJson
         def (fullModuleName, moduleName, moduleVersion) = (item.id =~ /^(.*)-(\d*\.\d*\.\d*.*)$/)[0]
         resultMap[moduleName] = [srcVersion: moduleVersion]
     }
-
+    println(srcJsonObj)
     dstJsonObj.each { item ->
         def (fullModuleName, moduleName, moduleVersion) = (item.id =~ /^(.*)-(\d*\.\d*\.\d*.*)$/)[0]
         if (!resultMap.containsKey(moduleName)) {
@@ -28,6 +28,7 @@ def getMigrationTime(rancher_cluster_name,rancher_project_name,resultMap,srcJson
         }
         resultMap[moduleName]['dstVersion'] = moduleVersion
     }
+    println(dstJsonObj)
 
 
     // Get logs about activating modules from elasticseach
