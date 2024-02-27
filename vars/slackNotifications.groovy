@@ -37,6 +37,7 @@ def renderSlackMessage(String testName, buildStatus, testsStatus, message, modul
         case "FAILURE":
         case "FAILED":
             message = STAGE_NAME
+            println("here")
             println(pipelineTemplate)
             def output = pipelineTemplate
                 .replace('$BUILD_URL', env.BUILD_URL)
