@@ -178,16 +178,16 @@ ansiColor('xterm') {
             currentBuild.result = 'FAILURE'
             error(exception.getMessage())
         } finally {
-            stage('Publish HTML Reports') {
-                publishHTML([
-                    reportDir: 'reportSchemas',
-                    reportFiles: '*.html',
-                    reportName: 'Schemas Diff',
-                    allowMissing: true,
-                    alwaysLinkToLastBuild: true,
-                    keepAll: true ])
-
-            }
+//            stage('Publish HTML Reports') {
+//                publishHTML([
+//                    reportDir: 'reportSchemas',
+//                    reportFiles: '*.html',
+//                    reportName: 'Schemas Diff',
+//                    allowMissing: true,
+//                    alwaysLinkToLastBuild: true,
+//                    keepAll: true ])
+//
+//            }
 
             stage('Send Slack notification') {
                 //folioSchemaCompareUtils.sendSlackNotification("#${params.SLACK_CHANNEL}")
