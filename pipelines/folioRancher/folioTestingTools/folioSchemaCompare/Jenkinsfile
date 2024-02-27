@@ -178,21 +178,21 @@ ansiColor('xterm') {
             currentBuild.result = 'FAILURE'
             error(exception.getMessage())
         } finally {
-            stage('Publish HTML Reports') {
-                publishHTML([
-                    reportDir: 'reportSchemas',
-                    reportFiles: '*.html',
-                    reportName: 'Schemas Diff',
-                    allowMissing: true,
-                    alwaysLinkToLastBuild: true,
-                    keepAll: true ])
-
-            }
-
-            stage('Send Slack notification') {
-                //folioSchemaCompareUtils.sendSlackNotification("#${params.SLACK_CHANNEL}")
-                slackNotifications.sendSchemaComparisonSlackNotification("test","#folioschemacompare", currentBuild.result)
-            }
+//            stage('Publish HTML Reports') {
+//                publishHTML([
+//                    reportDir: 'reportSchemas',
+//                    reportFiles: '*.html',
+//                    reportName: 'Schemas Diff',
+//                    allowMissing: true,
+//                    alwaysLinkToLastBuild: true,
+//                    keepAll: true ])
+//
+//            }
+//
+//            stage('Send Slack notification') {
+//                //folioSchemaCompareUtils.sendSlackNotification("#${params.SLACK_CHANNEL}")
+//                slackNotifications.sendSchemaComparisonSlackNotification("test","#folioschemacompare", currentBuild.result)
+//            }
 
             stage('Destroy data-migration project') {
                 def jobParameters = getEnvironmentJobParameters(
