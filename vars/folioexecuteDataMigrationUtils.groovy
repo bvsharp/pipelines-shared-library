@@ -30,6 +30,7 @@ def getMigrationTime(rancher_cluster_name,rancher_project_name,resultMap,srcJson
     }
     println("DESTINATION: ${dstJsonObj}")
     println("STARTTIME: ${startMigrationTime}")
+    println("PGADMIN: ${pgadminURL}")
 
     
     // Get logs about activating modules from elasticseach
@@ -142,9 +143,9 @@ def createTimeHtmlReport(tenantName, tenants, pgadminURL) {
                             modulesLongMigrationTime.put(moduleName, execTime)
                         }
                     }
-                    markup.bodyy(href: pgadminURL, target: "_blank") {
-                        builder.h2("pgAdmin")
-                    }
+                    // markup.bodyy(href: pgadminURL, target: "_blank") {
+                    //     builder.h2("pgAdmin")
+                    // }
                     markup.tr(style: "padding: 5px; border: solid 1px #777;") {
                         markup.td(style: "padding: 5px; border: solid 1px #777;", tenantInfo.tenantName)
                         markup.td(style: "padding: 5px; border: solid 1px #777;", moduleName)
