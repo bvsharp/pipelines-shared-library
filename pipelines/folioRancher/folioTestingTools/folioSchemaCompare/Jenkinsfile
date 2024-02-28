@@ -189,8 +189,7 @@ ansiColor('xterm') {
             }
 
             stage('Send Slack notification') {
-                //folioSchemaCompareUtils.sendSlackNotification("#${params.SLACK_CHANNEL}")
-                slackNotifications.sendSchemaComparisonSlackNotification("test","#folioschemacompare", 'FAILURE')
+                folioSchemaCompareUtils.sendSlackNotification("#${params.SLACK_CHANNEL}")
             }
 
             stage('Destroy data-migration project') {
