@@ -30,7 +30,7 @@ def renderSlackMessage(String testName, buildStatus, testsStatus, message, modul
         def passRate = (message =~ /Pass rate: (\d+)%/)?.getAt(0)?.getAt(1)?.toInteger()
         testsStatus = passRate > 50 ? "SUCCESS" : "FAILED"
     }
-
+    buildStatus = "SUCCESS"
     def pipelineTemplate = pipelineTemplates[buildStatus]
 
     switch (buildStatus) {
@@ -182,9 +182,7 @@ void sendCypressSlackNotification(message, channel, buildStatus) {
 void sendSchemaComparisonSlackNotification(message, channel, buildStatus) {
     def attachments = renderSlackMessage("comparison", buildStatus, "", message)
     if (attachments) {
-      slackSend(attachments: attachments, channel: channel)
-    } else {
-      println("Attachments are null. Skipping Slack notification.")
+    slackSend(attachments: attachments, channel: channel)
   }
 }
 
