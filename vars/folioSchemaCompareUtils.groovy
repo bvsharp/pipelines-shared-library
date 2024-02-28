@@ -252,11 +252,16 @@ void sendSlackNotification(String slackChannel) {
     println("Debug: Message: ${message}")
     println("Debug: Slack Channel: ${slackChannel}")
 
+    println(${buildStatus})
+    println(buildStatus)
+    println(${messege})
+    println(messege)
+
     if (message) {
       println("Debug: Sending Slack Notification Now")
       if (slackNotifications) {
         println("Debug: slackNotifications object exists")
-        slackNotifications.sendSchemaComparisonSlackNotification(message, "#folioschemacompare", buildStatus)
+        slackNotifications.sendSchemaComparisonSlackNotification(messege:message, "#folioschemacompare", ${buildStatus})
       } else {
         println("Debug: slackNotifications object is null")
       }
