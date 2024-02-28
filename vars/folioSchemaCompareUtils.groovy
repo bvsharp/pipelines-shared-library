@@ -253,7 +253,7 @@ void sendSlackNotification(String slackChannel) {
     println("Debug: Slack Channel: ${slackChannel}")
 
     if (message) {
-      slackNotifications.sendSchemaComparisonSlackNotification(message, "#folioschemacompare", buildStatus)
+      slackNotifications.sendSchemaComparisonSlackNotification("message", "#folioschemacompare", buildStatus)
     } else {
       println("Debug: Message is empty. Skipping Slack notification.")
     }
