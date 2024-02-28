@@ -199,10 +199,12 @@ void sendSlackNotification(String slackChannel) {
     }
 
     try {
+        println(currentBuild.result)
         //slackSend(color: '', message: message, channel: slackChannel)
         slackNotifications.sendSchemaComparisonSlackNotification("massage","#folioschemacompare", currentBuild.result)
     } catch (Exception e) {
         println("Unable to send slack notification to channel '${slackChannel}'")
+        println(Exception)
         e.printStackTrace()
     }
 }

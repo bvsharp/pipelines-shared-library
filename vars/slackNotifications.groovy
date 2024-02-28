@@ -181,9 +181,7 @@ void sendCypressSlackNotification(message, channel, buildStatus) {
 
 void sendSchemaComparisonSlackNotification(message, channel, buildStatus) {
     def attachments = renderSlackMessage("comparison", buildStatus, "", message)
-    if (attachments) {
     slackSend(attachments: attachments, channel: channel)
-  }
 }
 
 void sendPipelineFailSlackNotification(channel) {
