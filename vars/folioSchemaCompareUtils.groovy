@@ -251,11 +251,7 @@ void sendSlackNotification(String slackChannel) {
     println("Debug: Build Status: ${buildStatus}")
     println("Debug: Message: ${message}")
     println("Debug: Slack Channel: ${slackChannel}")
-
-    println(${buildStatus})
-    println(buildStatus)
-    println(${messege})
-    println(messege)
+    
 
     if (message) {
       println("Debug: Sending Slack Notification Now")
