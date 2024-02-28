@@ -254,7 +254,12 @@ void sendSlackNotification(String slackChannel) {
 
     if (message) {
       println("Debug: Sending Slack Notification Now")
-      slackNotifications.sendSchemaComparisonSlackNotification(message, "#folioschemacompare", buildStatus)
+      if (slackNotifications) {
+        println("Debug: slackNotifications object exists")
+        slackNotifications.sendSchemaComparisonSlackNotification(message, "#folioschemacompare", buildStatus)
+      } else {
+        println("Debug: slackNotifications object is null")
+      }
     } else {
       println("Debug: Message is empty. Skipping Slack notification.")
     }
@@ -264,6 +269,7 @@ void sendSlackNotification(String slackChannel) {
     e.printStackTrace()
   }
 }
+
 
 
 @NonCPS
