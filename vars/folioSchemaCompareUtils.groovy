@@ -188,25 +188,52 @@ def getSchemaTenantList(namespace, psqlPod, tenantId, dbParams) {
 }
 
  slack notfication
+//void sendSlackNotification(String slackChannel) {
+//    def buildStatus = currentBuild.result
+//    def message = "${buildStatus}: `${env.JOB_NAME}` #${env.BUILD_NUMBER}:\n${env.BUILD_URL}\n"
+//
+//    if (buildStatus == "FAILURE") {
+//        message += "Data Migration Failed. Please check logs in job."
+//    } else {
+//        message += "Detailed Schemas Diff: ${env.BUILD_URL}Schemas_20Diff/\n"
+//    }
+//
+//    try {
+//        println(currentBuild.result)
+//        //slackSend(color: '', message: message, channel: slackChannel)
+//        slackNotifications.sendSchemaComparisonSlackNotification("massage","#folioschemacompare", currentBuild.result)
+//    } catch (Exception e) {
+//        println("Unable to send slack notification to channel '${slackChannel}'")
+//        println(Exception)
+//        e.printStackTrace()
+//    }
+//}
 void sendSlackNotification(String slackChannel) {
-    def buildStatus = currentBuild.result
-    def message = "${buildStatus}: `${env.JOB_NAME}` #${env.BUILD_NUMBER}:\n${env.BUILD_URL}\n"
+  def buildStatus = currentBuild.result
+  def message = "${buildStatus}: `${env.JOB_NAME}` #${env.BUILD_NUMBER}:\n${env.BUILD_URL}\n"
 
-    if (buildStatus == "FAILURE") {
-        message += "Data Migration Failed. Please check logs in job."
-    } else {
-        message += "Detailed Schemas Diff: ${env.BUILD_URL}Schemas_20Diff/\n"
-    }
+  if (buildStatus == "FAILURE") {
+    message += "Data Migration Failed. Please check logs in job."
+  } else {
+    message += "Detailed Schemas Diff: ${env.BUILD_URL}Schemas_20Diff/\n"
+  }
 
-    try {
-        println(currentBuild.result)
-        //slackSend(color: '', message: message, channel: slackChannel)
-        slackNotifications.sendSchemaComparisonSlackNotification("massage","#folioschemacompare", currentBuild.result)
-    } catch (Exception e) {
-        println("Unable to send slack notification to channel '${slackChannel}'")
-        println(Exception)
-        e.printStackTrace()
-    }
+  try {
+    println("Debug: Sending Slack Notification")
+    println("Debug: Build Status: ${buildStatus}")
+    println("Debug: Message: ${message}")
+    println("Debug: Slack Channel: ${slackChannel}")
+
+    // Uncomment the line below for direct slackSend test
+    // slackSend(color: '', message: 'Test Slack notification', channel: '#folioschemacompare')
+
+    // Use slackNotifications.sendSchemaComparisonSlackNotification
+    slackNotifications.sendSchemaComparisonSlackNotification("message", "#folioschemacompare", buildStatus)
+  } catch (Exception e) {
+    println("Debug: Unable to send slack notification")
+    println("Debug: Exception - ${e.message}")
+    e.printStackTrace()
+  }
 }
 
 
