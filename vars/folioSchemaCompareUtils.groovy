@@ -257,7 +257,7 @@ void sendSlackNotification(String slackChannel) {
       println("Debug: Sending Slack Notification Now")
       if (slackNotifications) {
         println("Debug: slackNotifications object exists")
-        slackNotifications.sendSchemaComparisonSlackNotification("messege:message", "#folioschemacompare", "FAILURE")
+        slackNotifications.sendSchemaComparisonSlackNotification("test_notification", "#folioschemacompare", "FAILURE",)
       } else {
         println("Debug: slackNotifications object is null")
       }
