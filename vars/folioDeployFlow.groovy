@@ -154,9 +154,13 @@ void update(RancherNamespace namespace, boolean debug = false) {
   }
 
   if (namespace.getModules().getInstallJson()) {
-    stage('[Rest] refresh service discovery') {
+    stage('[Rest] Refresh service discovery') {
       main.refreshServicesDiscovery()
     }
+    stage('[Rest] Publish module descriptors'){
+      main.publishModulesDescriptors(main.getUnregisteredModuleDescriptors(namespace.getModules().getInstallJson()))
+    }
+
     stage('[Rest] Simulate installation') {
       namespace.getTenants().each { tenantId, tenant ->
         main.simulateInstall(tenant, tenant.getModules().getInstallJson())
@@ -170,10 +174,12 @@ void update(RancherNamespace namespace, boolean debug = false) {
     if (namespace.getModules().getBackendModules()) {
       backend(namespace,
         {
-          stage('[Rest] Unlock supertenant') {
-            namespace.setSuperTenantLocked(main.isTenantLocked(namespace.getSuperTenant()))
-            if (namespace.getSuperTenantLocked()) {
-              main.unlockSuperTenant(namespace.getSuperTenant())
+          if(namespace.getSuperTenant().getModules().getInstallJson()){
+            stage('[Rest] Unlock supertenant') {
+              namespace.setSuperTenantLocked(main.isTenantLocked(namespace.getSuperTenant()))
+              if (namespace.getSuperTenantLocked()) {
+                main.unlockSuperTenant(namespace.getSuperTenant())
+              }
             }
           }
         },
