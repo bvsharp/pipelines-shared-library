@@ -44,7 +44,7 @@ properties([
   ])
 ])
 
-String defaultTenantId = 'diku'
+String defaultTenantId = 'fs09000000'
 boolean releaseVersion = params.FOLIO_BRANCH ==~ /^R\d-\d{4}.*/
 
 //Set terraform configuration
