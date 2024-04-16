@@ -11,7 +11,7 @@ class Constants {
   static String AWS_S3_POSTGRES_BACKUPS = 'manage-postgres-db-backups-s3'
   static String AWS_EKS_VPC_NAME = 'folio-rancher-vpc'
   static String AWS_EKS_ADMIN_USERS = 'oleksandrhaimanov,eldiiarduishenaliev,renatsafiulin,tarasspashchenko,stanislav,arsenatoyan,dmytromoroz,vasylavramenko,yaroslavishchenko'
-  static List AWS_EKS_CLUSTERS = ['folio-testing', 'folio-dev', 'folio-perf', 'folio-tmp']
+  static List AWS_EKS_CLUSTERS = ['folio-testing', 'folio-dev', 'folio-perf', 'folio-tmp', 'folio-eks-upgrade']
   static List AWS_EKS_TMP_NAMESPACES = ['test', 'test-1', 'test-2', 'tdspora']
   static List AWS_EKS_TESTING_NAMESPACES = ['cypress', 'data-migration', 'ecs-snapshot', 'karate', 'snapshot', 'sprint', 'pre-bugfest', 'orchid-migration']
   static List AWS_EKS_DEV_NAMESPACES = ['aggies',
@@ -54,10 +54,11 @@ class Constants {
                                         'volaris',
                                         'volaris-2nd',
                                         'rtr']
-  static Map AWS_EKS_NAMESPACE_MAPPING = ['folio-testing': AWS_EKS_TESTING_NAMESPACES,
-                                          'folio-dev'    : AWS_EKS_DEV_NAMESPACES,
-                                          'folio-perf'   : AWS_EKS_DEV_NAMESPACES,
-                                          'folio-tmp'    : AWS_EKS_TMP_NAMESPACES]
+  static Map AWS_EKS_NAMESPACE_MAPPING = ['folio-testing'    : AWS_EKS_TESTING_NAMESPACES,
+                                          'folio-dev'        : AWS_EKS_DEV_NAMESPACES,
+                                          'folio-perf'       : AWS_EKS_DEV_NAMESPACES,
+                                          'folio-tmp'        : AWS_EKS_TMP_NAMESPACES,
+                                          'folio-eks-upgrade': AWS_EKS_TMP_NAMESPACES]
   static List AWS_EKS_NAMESPACE_CONFIGS = ['development',
                                            'performance',
                                            'testing']
@@ -99,8 +100,8 @@ class Constants {
   static String PGADMIN_DEFAULT_PASSWORD = 'SuperSecret'
 
   //ECS Snapshot Edge credentials
-  static  String ECS_EDGE_GENERAL_USERNAME = 'EBSCOEdge'
-  static  String ECS_EDGE_GENERAL_PASSWORD = 'edge'
+  static String ECS_EDGE_GENERAL_USERNAME = 'EBSCOEdge'
+  static String ECS_EDGE_GENERAL_PASSWORD = 'edge'
 
   //SMTP
   static String EMAIL_SMTP_CREDENTIALS_ID = 'ses-smtp-rancher'

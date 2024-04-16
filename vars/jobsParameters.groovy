@@ -52,7 +52,8 @@ static List clustersList() {
     return ['folio-testing',
             'folio-dev',
             'folio-perf',
-            'folio-tmp']
+            'folio-tmp',
+            'folio-eks-upgrade']
 }
 
 static List jenkinsAgentsList() {
@@ -133,7 +134,8 @@ static String generateProjectNamesMap() {
     return JsonOutput.toJson(['folio-testing': testingEnvironmentsList().sort(),
                               'folio-dev'    : devEnvironmentsList().sort(),
                               'folio-perf'   : perfEnvironmentsList().sort(),
-                              'folio-tmp'    : testEnvironmentsList().sort()])
+                              'folio-tmp'    : testEnvironmentsList().sort(),
+                              'folio-eks-upgrade': testEnvironmentsList().sort()])
 }
 
 static String getRepositoryBranches(String repository) {
