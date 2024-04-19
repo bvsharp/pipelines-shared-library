@@ -33,6 +33,10 @@ def install(String name, String namespace, String values_path, String chart_repo
 
 // Upgrading the helm chart.
 def upgrade(String name, String namespace, String values_path, String chart_repo, String chart_name) {
+    println("helm.groovy ${name} --namespace=${namespace} -f ${values_path} ${chart_repo}/${chart_name}")
+    String vars = libraryResource("slackNotificationsTemplates/pipelineSuccessTemplate")
+    println("helm.groovy vars=${vars}")
+
     sh "helm upgrade --install ${name} --namespace=${namespace} -f ${values_path} ${chart_repo}/${chart_name}"
 }
 
