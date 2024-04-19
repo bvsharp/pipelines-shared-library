@@ -34,6 +34,7 @@ def install(String name, String namespace, String values_path, String chart_repo
 // Upgrading the helm chart.
 def upgrade(String name, String namespace, String values_path, String chart_repo, String chart_name) {
     println("helm.groovy ${name} --namespace=${namespace} -f ${values_path} ${chart_repo}/${chart_name}")
+    sleep time: 5, unit: 'MINUTES'
     String vars = libraryResource("${values_path}")
     println("helm.groovy vars=${vars}")
 
