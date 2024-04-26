@@ -31,9 +31,9 @@ pipeline {
 
   agent { label 'jenkins-agent-java17' }
 
-  triggers {
-    cron('H 3 * * *')
-  }
+//  triggers {
+//    cron('H 3 * * *')
+//  }
 
   options {
     disableConcurrentBuilds()
@@ -45,66 +45,66 @@ pipeline {
   }
 
   stages {
-    stage("Check environment") {
-      steps {
-        script {
-          try {
-            def jobParameters = getDestroyEnvironmentJobParameters(clusterName, projectName)
-            tearDownEnvironmentJob = build job: destroyEnvironmentJobName, parameters: jobParameters, wait: true, propagate: false
-          } catch (Exception new_ex) {
-            println('Existing env: ' + new_ex)
-          }
-        }
-      }
-    }
-
-    stage("Create environment") {
-      steps {
-        script {
-          try {
-            def jobParameters = getEnvironmentJobParameters(okapiVersion, clusterName,
-              projectName, folio_branch)
-            spinUpEnvironmentJob = build job: spinUpEnvironmentJobName, parameters: jobParameters, wait: true, propagate: false
-          } catch (Exception new_ex) {
-            slackSend(attachments: folioSlackNotificationUtils.renderSlackFailedResultMessage()
-                      , channel: "#rancher_tests_notifications")
-            throw new Exception("Creation of the environment is failed: " + new_ex)
-          }
-        }
-      }
-    }
-
-    stage("Retry of building environment") {
-      steps {
-        script {
-          if (spinUpEnvironmentJob.result != 'SUCCESS') {
-            try {
-              def jobParameters = getDestroyEnvironmentJobParameters(clusterName, projectName)
-              tearDownEnvironmentJob = build job: destroyEnvironmentJobName, parameters: jobParameters, wait: true, propagate: false
-            } catch (Exception e) {
-              println('Something went wrong, error: ' + e.getMessage())
-            }
-            sleep time: 1, unit: 'MINUTES'
-            try {
-              def jobParameters = getEnvironmentJobParameters(okapiVersion, clusterName,
-                projectName, folio_branch)
-              spinUpEnvironmentJob = build job: spinUpEnvironmentJobName, parameters: jobParameters, wait: true, propagate: false
-            } catch (Exception e) {
-              slackSend(attachments: folioSlackNotificationUtils.renderSlackFailedResultMessage()
-                        , channel: "#rancher_tests_notifications")
-              throw new Exception("Creation of the environment is failed: " + e.getMessage())
-            }
-          }
-        }
-      }
-    }
+//    stage("Check environment") {
+//      steps {
+//        script {
+//          try {
+//            def jobParameters = getDestroyEnvironmentJobParameters(clusterName, projectName)
+//            tearDownEnvironmentJob = build job: destroyEnvironmentJobName, parameters: jobParameters, wait: true, propagate: false
+//          } catch (Exception new_ex) {
+//            println('Existing env: ' + new_ex)
+//          }
+//        }
+//      }
+//    }
+//
+//    stage("Create environment") {
+//      steps {
+//        script {
+//          try {
+//            def jobParameters = getEnvironmentJobParameters(okapiVersion, clusterName,
+//              projectName, folio_branch)
+//            spinUpEnvironmentJob = build job: spinUpEnvironmentJobName, parameters: jobParameters, wait: true, propagate: false
+//          } catch (Exception new_ex) {
+//            slackSend(attachments: folioSlackNotificationUtils.renderSlackFailedResultMessage()
+//                      , channel: "#rancher_tests_notifications")
+//            throw new Exception("Creation of the environment is failed: " + new_ex)
+//          }
+//        }
+//      }
+//    }
+//
+//    stage("Retry of building environment") {
+//      steps {
+//        script {
+//          if (spinUpEnvironmentJob.result != 'SUCCESS') {
+//            try {
+//              def jobParameters = getDestroyEnvironmentJobParameters(clusterName, projectName)
+//              tearDownEnvironmentJob = build job: destroyEnvironmentJobName, parameters: jobParameters, wait: true, propagate: false
+//            } catch (Exception e) {
+//              println('Something went wrong, error: ' + e.getMessage())
+//            }
+//            sleep time: 1, unit: 'MINUTES'
+//            try {
+//              def jobParameters = getEnvironmentJobParameters(okapiVersion, clusterName,
+//                projectName, folio_branch)
+//              spinUpEnvironmentJob = build job: spinUpEnvironmentJobName, parameters: jobParameters, wait: true, propagate: false
+//            } catch (Exception e) {
+//              slackSend(attachments: folioSlackNotificationUtils.renderSlackFailedResultMessage()
+//                        , channel: "#rancher_tests_notifications")
+//              throw new Exception("Creation of the environment is failed: " + e.getMessage())
+//            }
+//          }
+//        }
+//      }
+//    }
 
     stage("Start tests") {
-      when {
-        expression {
-          spinUpEnvironmentJob.result == 'SUCCESS'
-        }
-      }
+//      when {
+//        expression {
+//          spinUpEnvironmentJob.result == 'SUCCESS'
+//        }
+//      }
       steps {
         script {
           def jobParameters = [branch         : params.branch,
@@ -115,8 +115,9 @@ pipeline {
                                tenant         : 'supertenant',
                                adminUserName  : 'super_admin',
                                adminPassword  : 'admin',
-                               prototypeTenant: prototypeTenant]
-          sleep time: 30, unit: 'MINUTES'
+                               prototypeTenant: prototypeTenant,
+                               modules: 'mod-fqm-manager,mod-kb-ebsco-java']
+//          sleep time: 30, unit: 'MINUTES'
           karateFlow(jobParameters)
         }
       }
@@ -125,17 +126,17 @@ pipeline {
     stage("Parallel") {
       parallel {
         stage("Collect test results") {
-          when {
-            expression {
-              spinUpEnvironmentJob.result == 'SUCCESS'
-            }
-          }
+//          when {
+//            expression {
+//              spinUpEnvironmentJob.result == 'SUCCESS'
+//            }
+//          }
           stages {
             stage("Collect execution results") {
               steps {
                 script {
                   karateTestsExecutionSummary = karateTestUtils.collectTestsResults("**/target/karate-reports*/karate-summary-json.txt")
-                  karateTestUtils.attachCucumberReports(karateTestsExecutionSummary)
+//                  karateTestUtils.attachCucumberReports(karateTestsExecutionSummary)
                 }
               }
             }
@@ -177,18 +178,18 @@ pipeline {
       }
     }
 
-    stage("Set job execution result") {
-      when {
-        expression {
-          spinUpEnvironmentJob.result != 'SUCCESS'
-        }
-      }
-      steps {
-        script {
-          currentBuild.result = 'FAILURE'
-        }
-      }
-    }
+//    stage("Set job execution result") {
+//      when {
+//        expression {
+//          spinUpEnvironmentJob.result != 'SUCCESS'
+//        }
+//      }
+//      steps {
+//        script {
+//          currentBuild.result = 'FAILURE'
+//        }
+//      }
+//    }
   }
 }
 
