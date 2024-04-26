@@ -115,8 +115,7 @@ pipeline {
                                tenant         : 'supertenant',
                                adminUserName  : 'super_admin',
                                adminPassword  : 'admin',
-                               prototypeTenant: prototypeTenant,
-                               modules: 'mod-fqm-manager,mod-kb-ebsco-java']
+                               prototypeTenant: prototypeTenant]
           sleep time: 30, unit: 'MINUTES'
           karateFlow(jobParameters)
         }
@@ -141,14 +140,14 @@ pipeline {
               }
             }
               //TODO temporary disabled destroy for investigation
-            stage("Destroy environment") {
-              steps {
-                script {
-                  def jobParameters = getDestroyEnvironmentJobParameters(clusterName, projectName)
-                  tearDownEnvironmentJob = build job: destroyEnvironmentJobName, parameters: jobParameters, wait: true, propagate: false
-                }
-              }
-            }
+//            stage("Destroy environment") {
+//              steps {
+//                script {
+//                  def jobParameters = getDestroyEnvironmentJobParameters(clusterName, projectName)
+//                  tearDownEnvironmentJob = build job: destroyEnvironmentJobName, parameters: jobParameters, wait: true, propagate: false
+//                }
+//              }
+//            }
             stage("Parse teams assignment") {
               steps {
                 script {
