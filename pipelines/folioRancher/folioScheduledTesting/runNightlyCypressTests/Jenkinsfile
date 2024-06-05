@@ -26,7 +26,7 @@ final String folioBranch = 'snapshot'
 String okapiVersion = folioTools.eval(folioStringScripts.getOkapiVersions(), ['FOLIO_BRANCH': folioBranch])[0]
 def ns
 
-RancherNamespace namespace = new RancherNamespace('folio-testing', 'cypress')
+RancherNamespace namespace = new RancherNamespace('folio-tmp', 'cypress')
 
 Map cypressFlowParameters = [
   customBuildName       : env.JOB_BASE_NAME,
