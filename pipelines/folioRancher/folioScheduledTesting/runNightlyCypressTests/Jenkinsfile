@@ -2,10 +2,10 @@
 import org.folio.models.RancherNamespace
 import org.jenkinsci.plugins.workflow.libs.Library
 
-@Library('pipelines-shared-library@RANCHER-741-Jenkins-Enhancements') _
+@Library('pipelines-shared-library@RANCHER-1271') _
 
 properties([
-  pipelineTriggers([cron('H 20 * * *')]),
+//  pipelineTriggers([cron('H 20 * * *')]),
   buildDiscarder(logRotator(numToKeepStr: '30')),
   disableConcurrentBuilds(),
   parameters([
