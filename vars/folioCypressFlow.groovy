@@ -89,7 +89,7 @@ void call(params) {
                 batchSize = 6
                 break;
               case 'cypress':
-                workersLimit = 12
+                workersLimit = 8
                 batchSize = 4
                 break;
               default:
