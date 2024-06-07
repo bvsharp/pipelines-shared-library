@@ -65,11 +65,11 @@ void call(params) {
         String portalExecParams = reportPortal.getExecParams()
         println("Report portal execution parameters: ${portalExecParams}")
 
-        parallelExecParameters = parallelExecParameters?.trim() ?
-          "${parallelExecParameters} ${portalExecParams}" : parallelExecParameters
-
-        sequentialExecParameters = sequentialExecParameters?.trim() ?
-          "${sequentialExecParameters} ${portalExecParams}" : sequentialExecParameters
+//        parallelExecParameters = parallelExecParameters?.trim() ?
+//          "${parallelExecParameters} ${portalExecParams}" : parallelExecParameters
+//
+//        sequentialExecParameters = sequentialExecParameters?.trim() ?
+//          "${sequentialExecParameters} ${portalExecParams}" : sequentialExecParameters
       } catch (Exception e) {
         println("Error: " + e.getMessage())
       }
