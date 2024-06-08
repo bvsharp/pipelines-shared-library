@@ -257,6 +257,7 @@ void setupCommonEnvironmentVariables(String tenantUrl, String okapiUrl, String t
   env.CYPRESS_diku_login = adminUsername
   env.CYPRESS_diku_password = adminPassword
   env.AWS_DEFAULT_REGION = Constants.AWS_REGION
+  env.DEBUG='cypress:*'
 }
 
 void compileTests(String cypressImageVersion, String batchID = '') {
