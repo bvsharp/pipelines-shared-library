@@ -282,7 +282,7 @@ void executeTests(String cypressImageVersion, String customBuildName, String bro
     runId = runId.length() > 2 ? runId : "0${runId}"
     String execString = """
       export HOME=\$(pwd); export CYPRESS_CACHE_FOLDER=\$(pwd)/cache
-      export DEBUG=cypress:cli,cypress:server
+      export DEBUG=cypress:cli,cypress:server:*
       export DISPLAY=:${runId[-2..-1]}
       mkdir -p /tmp/.X11-unix
       Xvfb \$DISPLAY -screen 0 1920x1080x24 &
