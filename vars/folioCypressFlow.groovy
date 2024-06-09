@@ -258,7 +258,7 @@ void setupCommonEnvironmentVariables(String tenantUrl, String okapiUrl, String t
   env.CYPRESS_diku_password = adminPassword
   env.AWS_DEFAULT_REGION = Constants.AWS_REGION
 
-  env.CI_BUILD_ID = '${env.BUILD_ID}'
+  env.CI_BUILD_ID = "${env.BUILD_ID}"
   env.DEBUG='cypress*'
 //  env.DEBUG='cypress:server:util:process_profiler,cypress:server:reporter,cypress:server:project'
 }
