@@ -261,6 +261,7 @@ void setupCommonEnvironmentVariables(String tenantUrl, String okapiUrl, String t
   env.CI_BUILD_ID = "${env.BUILD_ID}"
   env.DEBUG='cypress*'
 //  env.DEBUG='cypress:server:util:process_profiler,cypress:server:reporter,cypress:server:project'
+  env.DEBUG_DEPTH = 3
 }
 
 void compileTests(String cypressImageVersion, String batchID = '') {
