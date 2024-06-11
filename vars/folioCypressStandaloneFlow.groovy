@@ -55,19 +55,7 @@ void call(params) {
   if(useReportPortal){
     stage('[ReportPortal config bind & launch]') {
       try {
-        reportPortal = new ReportPortalClient(this, TestType.CYPRESS, customBuildName, env.BUILD_NUMBER, env.WORKSPACE, runType)
-
-        rpLaunchID = reportPortal.launch()
-        println("${rpLaunchID}")
-
-        String portalExecParams = reportPortal.getExecParams()
-        println("Report portal execution parameters: ${portalExecParams}")
-
-        parallelExecParameters = parallelExecParameters?.trim() ?
-          "${parallelExecParameters} ${portalExecParams}" : parallelExecParameters
-
-        sequentialExecParameters = sequentialExecParameters?.trim() ?
-          "${sequentialExecParameters} ${portalExecParams}" : sequentialExecParameters
+        println("Report portal execution is ignored")
       } catch (Exception e) {
         println("Error: " + e.getMessage())
       }
@@ -147,16 +135,6 @@ void call(params) {
     println(e)
     error("Tests execution stage failed")
   } finally {
-    if (useReportPortal) {
-      stage("[ReportPortal Run stop]") {
-        try {
-          def res_end = reportPortal.launchFinish()
-          println("${res_end}")
-        } catch (Exception e) {
-          println("Couldn't stop run in ReportPortal\nError: ${e.getMessage()}")
-        }
-      }
-    }
     stage('[Allure] Generate report') {
       script {
         for (path in resultPaths) {
@@ -219,8 +197,8 @@ void compileTests(String cypressImageVersion, String batchID = '') {
         node -v; yarn -v
         yarn config set @folio:registry ${Constants.FOLIO_NPM_REPO_URL}
         env; yarn install
-        yarn add -D cypress-testrail-simple@${readPackageJsonDependencyVersion('./package.json', 'cypress-testrail-simple')}
-        yarn global add cypress-cloud@${readPackageJsonDependencyVersion('./package.json', 'cypress-cloud')}"""
+        yarn add -D cypress-testrail-simple@${readPackageJsonDependencyVersion('./package.json', 'cypress-testrail-simple')}"""
+        // yarn global add cypress-cloud@${readPackageJsonDependencyVersion('./package.json', 'cypress-cloud')}"""
 //      sh "yarn add @reportportal/agent-js-cypress@latest"
     })
   }
