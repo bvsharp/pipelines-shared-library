@@ -9,7 +9,8 @@ properties([
   buildDiscarder(logRotator(numToKeepStr: '30')),
   disableConcurrentBuilds(),
   parameters([
-    string(name: 'CYPRESS_BRANCH', defaultValue: 'master', description: "(Required) Insert what 'stripes-testing' branch use for build"),
+//    string(name: 'CYPRESS_BRANCH', defaultValue: 'master', description: "(Required) Insert what 'stripes-testing' branch use for build"),
+    string(name: 'CYPRESS_BRANCH', defaultValue: 'test_report_portal', description: "(Required) Insert what 'stripes-testing' branch use for build"),
     folioParameters.agent(),
     folioParameters.refreshParameters()
   ])
@@ -36,7 +37,8 @@ Map cypressFlowParameters = [
   tenantId              : 'diku',
   adminUsername         : 'diku_admin',
   adminPassword         : 'admin',
-  parallelExecParameters: '--env grepTags="smoke"',
+  parallelExecParameters: '--env grepTags="testTag"',
+//  parallelExecParameters: '--env grepTags="smoke"',
 //  parallelExecParameters: '--env grepTags="smokeBama"',
 //  sequentialExecParameters: '--env grepTags="smoke+nonParallel criticalPath+nonParallel"',
   testsTimeout          : '8',
