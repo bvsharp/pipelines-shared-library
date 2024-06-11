@@ -258,7 +258,7 @@ void setupCommonEnvironmentVariables(String tenantUrl, String okapiUrl, String t
   env.CYPRESS_diku_password = adminPassword
   env.AWS_DEFAULT_REGION = Constants.AWS_REGION
 
-  env.CI_BUILD_ID = "${env.BUILD_ID}"
+//  env.CI_BUILD_ID = "${env.BUILD_ID}"
   env.DEBUG='cypress*'
 //  env.DEBUG='cypress:server:util:process_profiler,cypress:server:reporter,cypress:server:project'
   env.DEBUG_DEPTH = 3
@@ -285,6 +285,7 @@ void executeTests(String cypressImageVersion, String customBuildName, String bro
     runId = runId.length() > 2 ? runId : "0${runId}"
     String execString = """
       export HOME=\$(pwd); export CYPRESS_CACHE_FOLDER=\$(pwd)/cache
+      export CI_BUILD_ID=${env.BUILD_ID}-${workerId}
       export DISPLAY=:${runId[-2..-1]}
       mkdir -p /tmp/.X11-unix
       Xvfb \$DISPLAY -screen 0 1920x1080x24 &
