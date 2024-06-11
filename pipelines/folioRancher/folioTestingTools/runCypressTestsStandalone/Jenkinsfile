@@ -84,7 +84,7 @@ ansiColor('xterm') {
     }
 
     stage('[Flow] Execute tests') {
-      folioCypressFlow(cypressFlowParameters)
+      folioCypressStandaloneFlow(cypressFlowParameters)
     }
   }
 }
