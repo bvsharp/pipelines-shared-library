@@ -48,7 +48,7 @@ Map cypressFlowParameters = [
   numberOfWorkers       : '12', //Changed form 10 to 6 according to instance resources capacity
   agent                 : 'cypress-static',
   runType               : 'night',
-  useReportPortal       : 'true'
+  useReportPortal       : 'false'
 ]
 
 ansiColor('xterm') {
