@@ -23,11 +23,11 @@ import org.folio.testing.TestType
  * @param params
  */
 void call(params) {
-  folioTools.validateParams(params, ['parallelExecParameters', 'sequentialExecParameters', 'testrailProjectID', 'testrailRunID', 'numberOfWorkers'])
+  folioTools.validateParams(params, ['parallelExecParameters', 'testrailProjectID', 'testrailRunID', 'numberOfWorkers'])
 
   /* Define variables */
   String customBuildName = params.customBuildName?.trim() ?
-    "${params.customBuildName.replaceAll(/[^A-Za-z0-9\s.]/, "").replace(' ', '_')}.${env.BUILD_ID}" : env.BUILD_ID
+    "#${params.customBuildName.replaceAll(/[^A-Za-z0-9\s.]/, "").replace(' ', '_')}.${env.BUILD_ID}" : "#${env.BUILD_ID}"
   String branch = params.branch
   String tenantUrl = params.tenantUrl
   String okapiUrl = params.okapiUrl
@@ -35,7 +35,7 @@ void call(params) {
   String adminUsername = params.adminUsername
   String adminPassword = params.adminPassword
   String parallelExecParameters = params.parallelExecParameters
-  String sequentialExecParameters = params.sequentialExecParameters
+  //String sequentialExecParameters = params.sequentialExecParameters
   String testsTimeout = params.testsTimeout?.trim() ?: Constants.GLOBAL_BUILD_TIMEOUT
   String testrailProjectID = params.testrailProjectID
   String testrailRunID = params.testrailRunID
@@ -54,7 +54,7 @@ void call(params) {
 
   buildName customBuildName
 
-  if(useReportPortal){
+  if (useReportPortal) {
     stage('[ReportPortal config bind & launch]') {
       try {
         reportPortal = new ReportPortalClient(this, TestType.CYPRESS, customBuildName, env.BUILD_NUMBER, env.WORKSPACE, runType)
@@ -68,8 +68,8 @@ void call(params) {
         parallelExecParameters = parallelExecParameters?.trim() ?
           "${parallelExecParameters} ${portalExecParams}" : parallelExecParameters
 
-        sequentialExecParameters = sequentialExecParameters?.trim() ?
-          "${sequentialExecParameters} ${portalExecParams}" : sequentialExecParameters
+        // sequentialExecParameters = sequentialExecParameters?.trim() ?
+        //   "${sequentialExecParameters} ${portalExecParams}" : sequentialExecParameters
       } catch (Exception e) {
         println("Error: " + e.getMessage())
       }
@@ -87,14 +87,14 @@ void call(params) {
               case 'cypress-static':
                 workersLimit = 6
                 batchSize = 6
-                break;
+                break
               case 'cypress':
                 workersLimit = 12
                 batchSize = 4
-                break;
+                break
               default:
                 error("Worker agent label unknown! '${agent}'")
-                break;
+                break
             }
             int maxWorkers = Math.min(numberOfWorkers, workersLimit) // Ensuring not more than limited workers number
             List<List<Integer>> batches = (1..maxWorkers).toList().collate(batchSize)
@@ -116,7 +116,7 @@ void call(params) {
                   }
 
                   batch.eachWithIndex { copyBatch, copyBatchIndex ->
-                    if(copyBatchIndex > 0){
+                    if (copyBatchIndex > 0) {
                       sh "mkdir -p cypress-${copyBatch}"
                       sh "cp -r cypress-${batch[0]}/. cypress-${copyBatch}"
                     }
@@ -125,16 +125,16 @@ void call(params) {
                   Map<String, Closure> parallelWorkers = [failFast: false]
                   batch.each { workerNumber ->
                     parallelWorkers["Worker#${workerNumber}"] = {
-                      dir("cypress-${workerNumber}"){
+                      dir("cypress-${workerNumber}") {
                         executeTests(cypressImageVersion, "parallel_${customBuildName}"
-                                      , browserName, parallelExecParameters
-                                      , testrailProjectID, testrailRunID, workerNumber.toString())
+                          , browserName, parallelExecParameters
+                          , testrailProjectID, testrailRunID, workerNumber.toString())
                       }
                     }
                   }
                   parallel(parallelWorkers)
 
-                  batch.each {workerNumber ->
+                  batch.each { workerNumber ->
                     dir("cypress-${workerNumber}") {
                       resultPaths.add(archiveTestResults("${workerNumber}"))
                     }
@@ -155,7 +155,7 @@ void call(params) {
             compileTests(cypressImageVersion)
 
             executeTests(cypressImageVersion, "sequential_${customBuildName}", browserName
-                          , sequentialExecParameters, testrailProjectID, testrailRunID)
+              , sequentialExecParameters, testrailProjectID, testrailRunID)
 
             resultPaths.add(archiveTestResults((numberOfWorkers + 1).toString()))
           }
@@ -166,16 +166,6 @@ void call(params) {
     println(e)
     error("Tests execution stage failed")
   } finally {
-    if (useReportPortal) {
-      stage("[ReportPortal Run stop]") {
-        try {
-          def res_end = reportPortal.launchFinish()
-          println("${res_end}")
-        } catch (Exception e) {
-          println("Couldn't stop run in ReportPortal\nError: ${e.getMessage()}")
-        }
-      }
-    }
     stage('[Allure] Generate report') {
       script {
         for (path in resultPaths) {
@@ -197,32 +187,6 @@ void call(params) {
           reportBuildPolicy: 'ALWAYS',
           results          : resultPaths.collect { path -> [path: "${path}/allure-results"] }
         ])
-      }
-    }
-
-    stage('[Allure] Send slack notifications') {
-      script {
-        def parseAllureReport = readJSON(file: "${WORKSPACE}/allure-report/data/suites.json")
-
-        Map<String, Integer> statusCounts = [failed: 0, passed: 0, broken: 0]
-        parseAllureReport.children.each { child ->
-          child.children.each { testCase ->
-            def status = testCase.status
-            if (statusCounts[status] != null) {
-              statusCounts[status] += 1
-            }
-          }
-        }
-
-        slackSend(attachments: folioSlackNotificationUtils
-                                .renderBuildAndTestResultMessage_OLD(
-                                  TestType.CYPRESS
-                                  , statusCounts
-                                  , customBuildName
-                                  , useReportPortal
-                                  , "${env.BUILD_URL}allure/"
-                                )
-                  , channel: "#rancher_tests_notifications")
       }
     }
   }
@@ -260,12 +224,12 @@ void setupCommonEnvironmentVariables(String tenantUrl, String okapiUrl, String t
 void compileTests(String cypressImageVersion, String batchID = '') {
   stage('Compile tests') {
     runInDocker(cypressImageVersion, "compile-${env.BUILD_ID}-${batchID}", {
-        sh """export HOME=\$(pwd); export CYPRESS_CACHE_FOLDER=\$(pwd)/cache
+      sh """export HOME=\$(pwd); export CYPRESS_CACHE_FOLDER=\$(pwd)/cache
         node -v; yarn -v
         yarn config set @folio:registry ${Constants.FOLIO_NPM_REPO_URL}
         env; yarn install
-        yarn add -D cypress-testrail-simple@${readPackageJsonDependencyVersion('./package.json', 'cypress-testrail-simple')}
-        yarn global add cypress-cloud@${readPackageJsonDependencyVersion('./package.json', 'cypress-cloud')}"""
+        yarn add -D cypress-testrail-simple@${readPackageJsonDependencyVersion('./package.json', 'cypress-testrail-simple')}"""
+//      yarn global add cypress-cloud@${readPackageJsonDependencyVersion('./package.json', 'cypress-cloud')}
 //      sh "yarn add @reportportal/agent-js-cypress@latest"
     })
   }
@@ -281,7 +245,7 @@ void executeTests(String cypressImageVersion, String customBuildName, String bro
       export DISPLAY=:${runId[-2..-1]}
       mkdir -p /tmp/.X11-unix
       Xvfb \$DISPLAY -screen 0 1920x1080x24 &
-      env; npx cypress-cloud run --parallel --record --browser ${browserName} --ci-build-id ${customBuildName} ${execParameters}
+      env; npx cypress run --parallel --browser ${browserName} --ci-build-id ${customBuildName} ${execParameters}
       pkill Xvfb
     """
 //    String execString = "npx cypress-cloud run --parallel --record --browser ${browserName} --ci-build-id ${customBuildName} ${execParameters}"
