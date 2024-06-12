@@ -98,7 +98,7 @@ void call(params) {
             }
             int maxWorkers = Math.min(numberOfWorkers, workersLimit) // Ensuring not more than limited workers number
             List<List<Integer>> batches = (1..maxWorkers).toList().collate(batchSize)
-
+            println(" ######### BATCHES " + batches)
             setupCommonEnvironmentVariables(tenantUrl, okapiUrl, tenantId, adminUsername, adminPassword)
 
             // Divide workers into batches
@@ -106,7 +106,7 @@ void call(params) {
             batches.eachWithIndex { batch, batchIndex ->
               batchExecutions["Batch#${batchIndex + 1}"] = {
                 node(agent) {
-                  println " ========>>  " + batch + " " + agent 
+                  println(" ========>>  " + batch + " " + agent)
                   cleanWs notFailBuild: true
 
                   dir("cypress-${batch[0]}") {
@@ -118,7 +118,7 @@ void call(params) {
 
                   batch.eachWithIndex { copyBatch, copyBatchIndex ->
                     if (copyBatchIndex > 0) {
-                      println " ~~~~~~~~~~~>>  " + copyBatch 
+                      println(" ~~~~~~~~~~~>>  " + copyBatch)
                       sh "mkdir -p cypress-${copyBatch}"
                       sh "cp -r cypress-${batch[0]}/. cypress-${copyBatch}"
                     }
@@ -247,7 +247,7 @@ void executeTests(String cypressImageVersion, String customBuildName, String bro
       export DISPLAY=:${runId[-2..-1]}
       mkdir -p /tmp/.X11-unix
       Xvfb \$DISPLAY -screen 0 1920x1080x24 &
-      env; npx cypress run --parallel --browser ${browserName} --ci-build-id ${customBuildName} ${execParameters}
+      env; npx cypress run --browser ${browserName} --ci-build-id ${customBuildName} ${execParameters}
       pkill Xvfb
     """
 //    String execString = "npx cypress-cloud run --parallel --record --browser ${browserName} --ci-build-id ${customBuildName} ${execParameters}"
@@ -266,7 +266,7 @@ void executeTests(String cypressImageVersion, String customBuildName, String bro
           sh execString
         }
       } else {
-        println " ---------- Start test exec >>  " + workerId
+        println(" ---------- Start test exec >>  " + workerId)
         sh execString
       }
     })
