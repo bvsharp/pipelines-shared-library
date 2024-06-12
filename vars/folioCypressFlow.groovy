@@ -54,27 +54,27 @@ void call(params) {
 
   buildName customBuildName
 
-  if (useReportPortal) {
-    stage('[ReportPortal config bind & launch]') {
-      try {
-        reportPortal = new ReportPortalClient(this, TestType.CYPRESS, customBuildName, env.BUILD_NUMBER, env.WORKSPACE, runType)
+  // if (useReportPortal) {
+  //   stage('[ReportPortal config bind & launch]') {
+  //     try {
+  //       reportPortal = new ReportPortalClient(this, TestType.CYPRESS, customBuildName, env.BUILD_NUMBER, env.WORKSPACE, runType)
 
-        rpLaunchID = reportPortal.launch()
-        println("${rpLaunchID}")
+  //       rpLaunchID = reportPortal.launch()
+  //       println("${rpLaunchID}")
 
-        String portalExecParams = reportPortal.getExecParams()
-        println("Report portal execution parameters: ${portalExecParams}")
+  //       String portalExecParams = reportPortal.getExecParams()
+  //       println("Report portal execution parameters: ${portalExecParams}")
 
-        parallelExecParameters = parallelExecParameters?.trim() ?
-          "${parallelExecParameters} ${portalExecParams}" : parallelExecParameters
+  //       parallelExecParameters = parallelExecParameters?.trim() ?
+  //         "${parallelExecParameters} ${portalExecParams}" : parallelExecParameters
 
-        // sequentialExecParameters = sequentialExecParameters?.trim() ?
-        //   "${sequentialExecParameters} ${portalExecParams}" : sequentialExecParameters
-      } catch (Exception e) {
-        println("Error: " + e.getMessage())
-      }
-    }
-  }
+  //       // sequentialExecParameters = sequentialExecParameters?.trim() ?
+  //       //   "${sequentialExecParameters} ${portalExecParams}" : sequentialExecParameters
+  //     } catch (Exception e) {
+  //       println("Error: " + e.getMessage())
+  //     }
+  //   }
+  // }
 
   try {
     timeout(time: testsTimeout, unit: 'HOURS') {
@@ -106,6 +106,7 @@ void call(params) {
             batches.eachWithIndex { batch, batchIndex ->
               batchExecutions["Batch#${batchIndex + 1}"] = {
                 node(agent) {
+                  println " ========>>  " + batch + " " + agent 
                   cleanWs notFailBuild: true
 
                   dir("cypress-${batch[0]}") {
@@ -117,6 +118,7 @@ void call(params) {
 
                   batch.eachWithIndex { copyBatch, copyBatchIndex ->
                     if (copyBatchIndex > 0) {
+                      println " ~~~~~~~~~~~>>  " + copyBatch 
                       sh "mkdir -p cypress-${copyBatch}"
                       sh "cp -r cypress-${batch[0]}/. cypress-${copyBatch}"
                     }
@@ -146,21 +148,21 @@ void call(params) {
           }
         }
       }
-      if (sequentialExecParameters?.trim()) {
-        stage('[Cypress] Sequential run') {
-          script {
-            cloneCypressRepo(branch)
-            cypressImageVersion = readPackageJsonDependencyVersion('./package.json', 'cypress')
+      // if (sequentialExecParameters?.trim()) {
+      //   stage('[Cypress] Sequential run') {
+      //     script {
+      //       cloneCypressRepo(branch)
+      //       cypressImageVersion = readPackageJsonDependencyVersion('./package.json', 'cypress')
 
-            compileTests(cypressImageVersion)
+      //       compileTests(cypressImageVersion)
 
-            executeTests(cypressImageVersion, "sequential_${customBuildName}", browserName
-              , sequentialExecParameters, testrailProjectID, testrailRunID)
+      //       executeTests(cypressImageVersion, "sequential_${customBuildName}", browserName
+      //         , sequentialExecParameters, testrailProjectID, testrailRunID)
 
-            resultPaths.add(archiveTestResults((numberOfWorkers + 1).toString()))
-          }
-        }
-      }
+      //       resultPaths.add(archiveTestResults((numberOfWorkers + 1).toString()))
+      //     }
+      //   }
+      // }
     }
   } catch (e) {
     println(e)
@@ -264,6 +266,7 @@ void executeTests(String cypressImageVersion, String customBuildName, String bro
           sh execString
         }
       } else {
+        println " ---------- Start test exec >>  " + workerId
         sh execString
       }
     })
