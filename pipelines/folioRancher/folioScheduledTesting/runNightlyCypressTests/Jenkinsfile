@@ -37,15 +37,15 @@ Map cypressFlowParameters = [
   tenantId              : 'diku',
   adminUsername         : 'diku_admin',
   adminPassword         : 'admin',
-//  parallelExecParameters: '--env grepTags="testTag2"',
+  parallelExecParameters: '--env grepTags="testTag3"',
 //  parallelExecParameters: '--env grepTags="testTag"',
-  parallelExecParameters: '--env grepTags="smoke"',
+//  parallelExecParameters: '--env grepTags="smoke"',
 //  parallelExecParameters: '--env grepTags="smokeBama"',
 //  sequentialExecParameters: '--env grepTags="smoke+nonParallel criticalPath+nonParallel"',
   testsTimeout          : '8',
 //  testrailProjectID     : '14',
 //  testrailRunID         : '2108',
-  numberOfWorkers       : '12', //Changed form 10 to 6 according to instance resources capacity
+  numberOfWorkers       : '1', //Changed form 10 to 6 according to instance resources capacity
   agent                 : 'cypress-static',
   runType               : 'night',
   useReportPortal       : 'false'
