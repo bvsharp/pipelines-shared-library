@@ -242,12 +242,12 @@ void executeTests(String cypressImageVersion, String customBuildName, String bro
   stage('Run tests') {
     String runId = workerId?.trim() ? "${env.BUILD_ID}${workerId}" : env.BUILD_ID
     runId = runId.length() > 2 ? runId : "0${runId}"
-    String execString = """ 
-      echo <><><><><><><>
+    String execString = ''' 
+      echo "<><><><><><><>"
       ( echo \$BASHPID )
-      echo /etc/machine-id
-      echo <><><><><><><> 
-    """
+      cat /etc/machine-id
+      echo "<><><><><><><>" 
+    '''
     // String execString = """
     //   export HOME=\$(pwd); export CYPRESS_CACHE_FOLDER=\$(pwd)/cache
     //   export DISPLAY=:${runId[-2..-1]}
