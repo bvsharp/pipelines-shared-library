@@ -112,7 +112,7 @@ void call(params) {
                   dir("cypress-${batch[0]}") {
                     cloneCypressRepo(branch)
                     cypressImageVersion = readPackageJsonDependencyVersion('./package.json', 'cypress')
-
+                    println(" ----- ----- Compiling test for cypress-${batch[0]}")
                     compileTests(cypressImageVersion, "${batch[0]}")
                   }
 
@@ -244,7 +244,8 @@ void executeTests(String cypressImageVersion, String customBuildName, String bro
     runId = runId.length() > 2 ? runId : "0${runId}"
     String execString = ''' 
       echo "<><><><><><><>"
-      ( echo \$BASHPID )
+      echo $$
+      pwd
       cat /etc/machine-id
       echo "<><><><><><><>" 
     '''
