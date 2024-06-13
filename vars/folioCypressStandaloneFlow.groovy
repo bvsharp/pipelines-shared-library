@@ -242,14 +242,20 @@ void executeTests(String cypressImageVersion, String customBuildName, String bro
   stage('Run tests') {
     String runId = workerId?.trim() ? "${env.BUILD_ID}${workerId}" : env.BUILD_ID
     runId = runId.length() > 2 ? runId : "0${runId}"
-    String execString = """
-      export HOME=\$(pwd); export CYPRESS_CACHE_FOLDER=\$(pwd)/cache
-      export DISPLAY=:${runId[-2..-1]}
-      mkdir -p /tmp/.X11-unix
-      Xvfb \$DISPLAY -screen 0 1920x1080x24 &
-      env; npx cypress run --browser ${browserName} ${execParameters}
-      pkill Xvfb
+    String execString = """ 
+      echo <><><><><><><>
+      ( echo $$; echo $BASHPID )
+      echo /etc/machine-id
+      echo <><><><><><><> 
     """
+    // String execString = """
+    //   export HOME=\$(pwd); export CYPRESS_CACHE_FOLDER=\$(pwd)/cache
+    //   export DISPLAY=:${runId[-2..-1]}
+    //   mkdir -p /tmp/.X11-unix
+    //   Xvfb \$DISPLAY -screen 0 1920x1080x24 &
+    //   env; npx cypress run --browser ${browserName} ${execParameters}
+    //   pkill Xvfb
+    // """
 //    String execString = "npx cypress-cloud run --parallel --record --browser ${browserName} --ci-build-id ${customBuildName} ${execParameters}"
 
     runInDocker(cypressImageVersion, "worker-${runId}", {
