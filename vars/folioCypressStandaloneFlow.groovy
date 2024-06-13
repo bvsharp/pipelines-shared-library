@@ -247,7 +247,7 @@ void executeTests(String cypressImageVersion, String customBuildName, String bro
       export DISPLAY=:${runId[-2..-1]}
       mkdir -p /tmp/.X11-unix
       Xvfb \$DISPLAY -screen 0 1920x1080x24 &
-      env; npx cypress run --browser ${browserName} --ci-build-id ${customBuildName} ${execParameters}
+      env; npx cypress run --browser ${browserName} ${execParameters}
       pkill Xvfb
     """
 //    String execString = "npx cypress-cloud run --parallel --record --browser ${browserName} --ci-build-id ${customBuildName} ${execParameters}"
