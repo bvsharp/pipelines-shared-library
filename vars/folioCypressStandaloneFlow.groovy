@@ -244,7 +244,7 @@ void executeTests(String cypressImageVersion, String customBuildName, String bro
     runId = runId.length() > 2 ? runId : "0${runId}"
     String execString = """ 
       echo <><><><><><><>
-      ( echo $$; echo $BASHPID )
+      ( echo \$BASHPID )
       echo /etc/machine-id
       echo <><><><><><><> 
     """
