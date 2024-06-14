@@ -356,8 +356,8 @@ void tuneWorkspaceForRP(){
   String report_portal_client = "@reportportal/client-javascript/lib/report-portal-client.js"
   String config = "@reportportal/client-javascript/lib/commons/config.js"
 
-  writeFile file: "./node_modules/@reportportal/agent-js-cypress/lib/!bla1.js", text: libraryResource("reportportal/${cypressReporter}")
-  writeFile file: "./node_modules/@reportportal/client-javascript/lib/!bla2.js", text: libraryResource("reportportal/${report_portal_client}")
-  writeFile file: "./node_modules/@reportportal/client-javascript/lib/commons/!bla3.js", text: libraryResource("reportportal/${config}")
+  writeFile file: "./node_modules/${cypressReporter}", text: libraryResource("reportportal/${cypressReporter}")
+  writeFile file: "./node_modules/${report_portal_client}", text: libraryResource("reportportal/${report_portal_client}")
+  writeFile file: "./node_modules/${config}", text: libraryResource("reportportal/${config}")
 }
 
