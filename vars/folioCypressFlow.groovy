@@ -361,6 +361,6 @@ void tuneWorkspaceForRP(){
   writeFile file: "./node_modules/${config}", text: libraryResource("reportportal/${config}")
 
   //TODO: Remove. Test purposes.
-  writeFile file: "./cypress.config.js", text: libraryResource("stripes-testing/cypress.config.js")
+//  writeFile file: "./cypress.config.js", text: libraryResource("stripes-testing/cypress.config.js")
 }
 

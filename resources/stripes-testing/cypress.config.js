@@ -11,30 +11,30 @@ const registerReportPortalPlugin = require('@reportportal/agent-js-cypress/lib/p
 
 const delay = async ms => new Promise(res => setTimeout(res, ms));
 
-const reportportalOptions = {
-  endpoint: 'https://poc-report-portal.ci.folio.org/api/v1',
-  apiKey: 'karate_YTzxxZQCTouIhffBDFYf9VFjLPdLn5sSumAN9Fs7SB64EIu3wrPFgbXHPc1OGs0Q',
-  launch: 'runNightlyCypressTests1271.109',
-//  launchId: '2e63f6f8-b1c3-4fff-ae5d-91395b5086d6',
-  //CI_BUILD_ID: '106-1',
-  project: 'cypress-nightly',
-  description: 'CYPRESS scheduled tests bla bla',
-  //autoMerge: true,
-  //parallel: true,
-  isLaunchMergeRequired: true,
-  //reportHooks: true,
-  bkbkbkb: false,
-  debug: true,
-//  restClientConfig: {
-//    timeout: 360000,
-//  },
-  attributes: [
-    {
-      key: 'build',
-      value: '109',
-    }
-  ],
-}
+//const reportportalOptions = {
+//  endpoint: 'https://poc-report-portal.ci.folio.org/api/v1',
+//  apiKey: 'karate_YTzxxZQCTouIhffBDFYf9VFjLPdLn5sSumAN9Fs7SB64EIu3wrPFgbXHPc1OGs0Q',
+//  launch: 'runNightlyCypressTests1271.109',
+////  launchId: '2e63f6f8-b1c3-4fff-ae5d-91395b5086d6',
+//  //CI_BUILD_ID: '106-1',
+//  project: 'cypress-nightly',
+//  description: 'CYPRESS scheduled tests bla bla',
+//  //autoMerge: true,
+//  //parallel: true,
+//  isLaunchMergeRequired: true,
+//  //reportHooks: true,
+//  bkbkbkb: false,
+//  debug: true,
+////  restClientConfig: {
+////    timeout: 360000,
+////  },
+//  attributes: [
+//    {
+//      key: 'build',
+//      value: '109',
+//    }
+//  ],
+//}
 
 module.exports = defineConfig({
   retries: {
@@ -62,8 +62,8 @@ module.exports = defineConfig({
     rtrAuth: true,
     ecsEnabled: false,
   },
-  reporter: '@reportportal/agent-js-cypress',
-  reporterOptions: reportportalOptions,
+//  reporter: '@reportportal/agent-js-cypress',
+//  reporterOptions: reportportalOptions,
   e2e: {
     async setupNodeEvents(on, config) {
       allureWriter(on, config);
