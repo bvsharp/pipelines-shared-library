@@ -65,11 +65,11 @@ void call(params) {
         String portalExecParams = reportPortal.getExecParams()
         println("Report portal execution parameters: ${portalExecParams}")
 
-        parallelExecParameters = parallelExecParameters?.trim() ?
-          "${parallelExecParameters} ${portalExecParams}" : parallelExecParameters
-
-        sequentialExecParameters = sequentialExecParameters?.trim() ?
-          "${sequentialExecParameters} ${portalExecParams}" : sequentialExecParameters
+//        parallelExecParameters = parallelExecParameters?.trim() ?
+//          "${parallelExecParameters} ${portalExecParams}" : parallelExecParameters
+//
+//        sequentialExecParameters = sequentialExecParameters?.trim() ?
+//          "${sequentialExecParameters} ${portalExecParams}" : sequentialExecParameters
       } catch (Exception e) {
         println("Error: " + e.getMessage())
       }
@@ -282,7 +282,6 @@ void executeTests(String cypressImageVersion, String customBuildName, String bro
     runId = runId.length() > 2 ? runId : "0${runId}"
     String execString = """
       export HOME=\$(pwd); export CYPRESS_CACHE_FOLDER=\$(pwd)/cache
-      export CI_BUILD_ID=${env.BUILD_ID}-${workerId}
       export DISPLAY=:${runId[-2..-1]}
       mkdir -p /tmp/.X11-unix
       Xvfb \$DISPLAY -screen 0 1920x1080x24 &
