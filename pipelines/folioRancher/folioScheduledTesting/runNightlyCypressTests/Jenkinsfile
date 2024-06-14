@@ -35,7 +35,7 @@ final String platformCompleteBranch = 'snapshot'
 String okapiVersion = folioTools.eval(folioStringScripts.getOkapiVersions(), ['FOLIO_BRANCH': platformCompleteBranch])[0]
 
 CreateNamespaceParameters namespaceBaseParams = new CreateNamespaceParameters.Builder()
-  .clusterName('folio-testing')
+  .clusterName('folio-tmp')
   .namespaceName('cypress')
   .rwSplit(false)
   .greenmail(false)
