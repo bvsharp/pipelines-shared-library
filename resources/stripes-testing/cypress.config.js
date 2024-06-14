@@ -25,9 +25,9 @@ const reportportalOptions = {
   //reportHooks: true,
   bkbkbkb: false,
   debug: true,
-  restClientConfig: {
-    timeout: 360000,
-  },
+//  restClientConfig: {
+//    timeout: 360000,
+//  },
   attributes: [
     {
       key: 'build',
