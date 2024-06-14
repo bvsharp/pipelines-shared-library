@@ -23,6 +23,7 @@ const reportportalOptions = {
   //parallel: true,
   isLaunchMergeRequired: true,
   //reportHooks: true,
+  bkbkbkb: false,
   debug: true,
   restClientConfig: {
     timeout: 360000,
