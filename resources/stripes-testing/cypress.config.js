@@ -14,7 +14,7 @@ const delay = async ms => new Promise(res => setTimeout(res, ms));
 const reportportalOptions = {
   endpoint: 'https://poc-report-portal.ci.folio.org/api/v1',
   apiKey: 'karate_YTzxxZQCTouIhffBDFYf9VFjLPdLn5sSumAN9Fs7SB64EIu3wrPFgbXHPc1OGs0Q',
-//  launch: 'runNightlyCypressTests1271.109',
+  launch: 'runNightlyCypressTests1271.109',
 //  launchId: '2e63f6f8-b1c3-4fff-ae5d-91395b5086d6',
   //CI_BUILD_ID: '106-1',
   project: 'cypress-nightly',
@@ -27,12 +27,12 @@ const reportportalOptions = {
   restClientConfig: {
     timeout: 360000,
   },
-//  attributes: [
-//    {
-//      key: 'build',
-//      value: '109',
-//    }
-//  ],
+  attributes: [
+    {
+      key: 'build',
+      value: '109',
+    }
+  ],
 }
 
 module.exports = defineConfig({
