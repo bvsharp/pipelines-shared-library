@@ -114,7 +114,7 @@ void call(params) {
 
                     compileTests(cypressImageVersion, "${batch[0]}")
 
-                    tuneWorkspaceForRP()
+//                    tuneWorkspaceForRP()
                   }
 
                   batch.eachWithIndex { copyBatch, copyBatchIndex ->
