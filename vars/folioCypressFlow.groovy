@@ -114,7 +114,7 @@ void call(params) {
 
                     compileTests(cypressImageVersion, "${batch[0]}")
 
-//                    tuneWorkspaceForRP()
+                    tuneWorkspaceForRP()
                   }
 
                   batch.eachWithIndex { copyBatch, copyBatchIndex ->
@@ -124,7 +124,7 @@ void call(params) {
                     }
                   }
 
-                  sleep time: 3, unit: 'MINUTES'
+                  sleep time: 1, unit: 'MINUTES'
 
                   Map<String, Closure> parallelWorkers = [failFast: false]
                   batch.each { workerNumber ->
@@ -359,5 +359,8 @@ void tuneWorkspaceForRP(){
   writeFile file: "./node_modules/${cypressReporter}", text: libraryResource("reportportal/${cypressReporter}")
   writeFile file: "./node_modules/${report_portal_client}", text: libraryResource("reportportal/${report_portal_client}")
   writeFile file: "./node_modules/${config}", text: libraryResource("reportportal/${config}")
+
+  //TODO: Remove. Test purposes.
+  writeFile file: "./cypress.config.js", text: libraryResource("stripes-testing/cypress.config.js")
 }
 
