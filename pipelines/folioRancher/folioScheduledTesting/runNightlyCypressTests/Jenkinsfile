@@ -116,7 +116,6 @@ ansiColor('xterm') {
 //      }
 
       stage('[Flow] Execute tests') {
-        logger.info("cypressFlowParameters= ${cypressFlowParameters}")
         folioCypressFlow(cypressFlowParameters)
       }
     } catch (e) {
