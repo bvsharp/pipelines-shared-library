@@ -9,6 +9,8 @@ const allureWriter = require('@shelex/cypress-allure-plugin/writer');
 const { cloudPlugin } = require('cypress-cloud/plugin');
 const registerReportPortalPlugin = require('@reportportal/agent-js-cypress/lib/plugin');
 
+const delay = async ms => new Promise(res => setTimeout(res, ms));
+
 module.exports = defineConfig({
   retries: {
     runMode: 0,
@@ -99,6 +101,47 @@ module.exports = defineConfig({
           const filePath = path.join(downloadsFolder, filename);
           return fs.readFileSync(filePath, 'utf-8');
         },
+      });
+
+      // keep Cypress running until the ReportPortal reporter is finished. this is a
+      // very critical step, as otherwise results might not be completely pushed into
+      // ReportPortal, resulting in unfinsihed launches and failing merges
+      on('after:run', async (result) => {
+        console.log(`after:run event start`);
+
+        if(result){
+          //console.log(`after:run Result: ${JSON.stringify(result)}`)
+
+          console.log('Wait for reportportal agent to finish...');
+
+          console.log(`after:run Project root: ${result.config.projectRoot}`);
+          console.log(`after:run Current dir: ${process.cwd()}`);
+
+          let files = globby.sync('rplaunchinprogress*.tmp');
+
+          if (files.length > 0) {
+            console.log('after:run Print all undeleted files...');
+            files.map(file => console.log(file));
+            console.log('after:run Printing of all undeleted files finished');
+          }
+
+          if (globby.sync('rplaunchinprogress*.tmp').length > 0) {
+          //while (globby.sync('rplaunchinprogress*.tmp').length > 0) {
+            console.log("Report portal. At least I am here to wait...")
+            await delay(2000);
+          }
+          //console.log('reportportal agent finished');
+          //if (reportportalOptions.isLaunchMergeRequired) {
+          //  try {
+          //    console.log('Merging launches...');
+              //await mergeLaunches(reportportalOptions);
+          //   console.log('Launches successfully merged!');
+          //    //deleteLaunchFiles();
+          //  } catch (mergeError) {
+          //    console.error(mergeError);
+          //  }
+          //}
+        }
       });
 
       // fix for cypress-testrail-simple plugin
