@@ -120,6 +120,7 @@ class CypressReporter extends Mocha.reporters.Base {
     }
 
     this.runner.on(EVENT_RUN_BEGIN, () => {
+      console.log(`EVENT_RUN_BEGIN`, CypressReporter.reporterOptions)
       if (CypressReporter.shouldStartLaunch()) {
         this.worker.send({
           event: EVENT_RUN_BEGIN,
