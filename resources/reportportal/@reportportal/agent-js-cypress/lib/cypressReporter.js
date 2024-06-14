@@ -160,8 +160,11 @@ class CypressReporter extends Mocha.reporters.Base {
     });
 
     this.runner.on(EVENT_RUN_END, () => {
+      console.log(`EVENT_RUN_END`);
+
       CypressReporter.calcTotalLaunches();
       if (CypressReporter.shouldStopLaunch()) {
+        console.log(`EVENT_RUN_END shouldStopLaunch true`);
         this.worker.send({ event: EVENT_RUN_END, launch: getLaunchStartObject(config) });
       }
     });
