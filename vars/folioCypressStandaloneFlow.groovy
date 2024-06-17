@@ -98,7 +98,7 @@ void call(params) {
             }
             int maxWorkers = Math.min(numberOfWorkers, workersLimit) // Ensuring not more than limited workers number
             List<List<Integer>> batches = (1..maxWorkers).toList().collate(batchSize)
-            def testQueue = ['Volaris','Vega','Thunderjet','Spitfire','Folijet','Firebird','Corsair'] as Queue
+            def testQueue = ['Volaris','Vega','Thunderjet','Spitfire','Folijet','Firebird','Corsair']
             // Shared state to track worker status
             def workerStatus = [:]
             println(" ######### BATCHES " + batches)
@@ -131,7 +131,7 @@ void call(params) {
                   batch.each { workerNumber ->
                     if (!testQueue.isEmpty()) {
                       parallelWorkers["Worker#${workerNumber}"] = {
-                        def testToExecute = testQueue.poll()
+                        def testToExecute = testQueue.pop()
                         dir("cypress-${workerNumber}") {
                           executeTests(cypressImageVersion, "parallel_${customBuildName}"
                             , browserName, parallelExecParameters
@@ -151,7 +151,7 @@ void call(params) {
                         if (!workerStatus[workerName]) {
                           if (!taskQueue.isEmpty()) {
                             parallelWorkers["Worker#${workerNumber}"] = {
-                              def testToExecute = testQueue.poll()
+                              def testToExecute = testQueue.pop()
                               dir("cypress-${workerNumber}") {
                                 executeTests(cypressImageVersion, "parallel_${customBuildName}"
                                   , browserName, parallelExecParameters
