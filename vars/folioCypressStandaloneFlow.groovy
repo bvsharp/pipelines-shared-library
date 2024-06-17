@@ -98,8 +98,7 @@ void call(params) {
             }
             int maxWorkers = Math.min(numberOfWorkers, workersLimit) // Ensuring not more than limited workers number
             List<List<Integer>> batches = (1..maxWorkers).toList().collate(batchSize)
-            List<String> testGroups = ['Volaris','Vega','Thunderjet','Spitfire','Folijet','Firebird','Corsair']
-            def testQueue = testGroups.toQueue()
+            def testQueue = ['Volaris','Vega','Thunderjet','Spitfire','Folijet','Firebird','Corsair'] as Queue
             // Shared state to track worker status
             def workerStatus = [:]
             println(" ######### BATCHES " + batches)
