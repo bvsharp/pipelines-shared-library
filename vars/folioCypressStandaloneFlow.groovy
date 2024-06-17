@@ -98,6 +98,10 @@ void call(params) {
             }
             int maxWorkers = Math.min(numberOfWorkers, workersLimit) // Ensuring not more than limited workers number
             List<List<Integer>> batches = (1..maxWorkers).toList().collate(batchSize)
+            List<String> testGroups = ['Volaris','Vega','Thunderjet','Spitfire','Folijet','Firebird','Corsair']
+            def testQueue = testGroups.toQueue()
+            // Shared state to track worker status
+            def workerStatus = [:]
             println(" ######### BATCHES " + batches)
             setupCommonEnvironmentVariables(tenantUrl, okapiUrl, tenantId, adminUsername, adminPassword)
 
@@ -126,16 +130,46 @@ void call(params) {
 
                   Map<String, Closure> parallelWorkers = [failFast: false]
                   batch.each { workerNumber ->
-                    parallelWorkers["Worker#${workerNumber}"] = {
-                      dir("cypress-${workerNumber}") {
-                        executeTests(cypressImageVersion, "parallel_${customBuildName}"
-                          , browserName, parallelExecParameters
-                          , testrailProjectID, testrailRunID, workerNumber.toString())
+                    if (!testQueue.isEmpty()) {
+                      parallelWorkers["Worker#${workerNumber}"] = {
+                        def testToExecute = testQueue.poll()
+                        dir("cypress-${workerNumber}") {
+                          executeTests(cypressImageVersion, "parallel_${customBuildName}"
+                            , browserName, parallelExecParameters
+                            , testrailProjectID, testrailRunID, workerNumber.toString(), testToExecute, workerStatus)
+                        }
                       }
                     }
                   }
                   parallel(parallelWorkers)
+                  // Monitor and execute remaining tasks
+                  while (!testQueue.isEmpty()) {
+                    waitUntil {
+                      // Check if any worker is free
+                      def freeWorker = false
+                      batch.each { workerNumber ->
+                        def workerName = workerNumber.toString()
+                        if (!workerStatus[workerName]) {
+                          if (!taskQueue.isEmpty()) {
+                            parallelWorkers["Worker#${workerNumber}"] = {
+                              def testToExecute = testQueue.poll()
+                              dir("cypress-${workerNumber}") {
+                                executeTests(cypressImageVersion, "parallel_${customBuildName}"
+                                  , browserName, parallelExecParameters
+                                  , testrailProjectID, testrailRunID, workerNumber.toString(), testToExecute, workerStatus)
+                              }
+                            }
+                            freeWorker = true
+                          }
+                        }
+                      }
+                        return freeWorker
+                    }
+                    // Execute remaining tasks in parallel
+                    parallel(parallelWorkers)
+                  }
 
+                  ////////////////////////////////////////////////
                   batch.each { workerNumber ->
                     dir("cypress-${workerNumber}") {
                       resultPaths.add(archiveTestResults("${workerNumber}"))
@@ -148,21 +182,6 @@ void call(params) {
           }
         }
       }
-      // if (sequentialExecParameters?.trim()) {
-      //   stage('[Cypress] Sequential run') {
-      //     script {
-      //       cloneCypressRepo(branch)
-      //       cypressImageVersion = readPackageJsonDependencyVersion('./package.json', 'cypress')
-
-      //       compileTests(cypressImageVersion)
-
-      //       executeTests(cypressImageVersion, "sequential_${customBuildName}", browserName
-      //         , sequentialExecParameters, testrailProjectID, testrailRunID)
-
-      //       resultPaths.add(archiveTestResults((numberOfWorkers + 1).toString()))
-      //     }
-      //   }
-      // }
     }
   } catch (e) {
     println(e)
@@ -238,13 +257,15 @@ void compileTests(String cypressImageVersion, String batchID = '') {
 }
 
 void executeTests(String cypressImageVersion, String customBuildName, String browserName, String execParameters,
-                  String testrailProjectID = '', String testrailRunID = '', String workerId = '') {
+                  String testrailProjectID = '', String testrailRunID = '', String workerId = '', String testGroupName, Map status) {
   stage('Run tests') {
+    workerStatus[workerId] = true
     String runId = workerId?.trim() ? "${env.BUILD_ID}${workerId}" : env.BUILD_ID
     runId = runId.length() > 2 ? runId : "0${runId}"
     String execString = ''' 
       echo "<><><><><><><>"
-      echo $$
+      echo "${testGroupName}"
+      echo ( $$ )
       pwd
       cat /etc/machine-id
       echo "<><><><><><><>" 
@@ -277,6 +298,7 @@ void executeTests(String cypressImageVersion, String customBuildName, String bro
         sh execString
       }
     })
+    workerStatus[workerId] = false
   }
 }
 
