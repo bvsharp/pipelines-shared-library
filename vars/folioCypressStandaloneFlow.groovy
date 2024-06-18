@@ -100,7 +100,7 @@ void call(params) {
             List<List<Integer>> batches = (1..maxWorkers).toList().collate(batchSize)
             def testQueue = ['Volaris','Vega','Thunderjet','Spitfire','Folijet','Firebird','Corsair']
             // Shared state to track worker status
-            def workerStatus = [:]
+            def workerStatus = [failFast: false]
             println(" ######### BATCHES " + batches)
             setupCommonEnvironmentVariables(tenantUrl, okapiUrl, tenantId, adminUsername, adminPassword)
 
@@ -132,6 +132,7 @@ void call(params) {
                     if (!testQueue.isEmpty()) {
                       parallelWorkers["Worker#${workerNumber}"] = {
                         def testToExecute = testQueue.pop()
+                        println(" || " + testToExecute)
                         dir("cypress-${workerNumber}") {
                           executeTests(cypressImageVersion, "parallel_${customBuildName}"
                             , browserName, parallelExecParameters
