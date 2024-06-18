@@ -20,10 +20,12 @@ import org.folio.testing.TestType
  * - testrailRunID
  * - numberOfWorkers
  * - agent
+ * - useReportPortal
+ * - runType
  * @param params
  */
 void call(params) {
-  folioTools.validateParams(params, ['parallelExecParameters', 'testrailProjectID', 'testrailRunID', 'numberOfWorkers'])
+  folioTools.validateParams(params, ['parallelExecParameters', 'sequentialExecParameters', 'testrailProjectID', 'testrailRunID', 'numberOfWorkers'])
 
   /* Define variables */
   String customBuildName = params.customBuildName?.trim() ?
@@ -35,7 +37,7 @@ void call(params) {
   String adminUsername = params.adminUsername
   String adminPassword = params.adminPassword
   String parallelExecParameters = params.parallelExecParameters
-  //String sequentialExecParameters = params.sequentialExecParameters
+  String sequentialExecParameters = params.sequentialExecParameters
   String testsTimeout = params.testsTimeout?.trim() ?: Constants.GLOBAL_BUILD_TIMEOUT
   String testrailProjectID = params.testrailProjectID
   String testrailRunID = params.testrailRunID
@@ -68,8 +70,8 @@ void call(params) {
   //       parallelExecParameters = parallelExecParameters?.trim() ?
   //         "${parallelExecParameters} ${portalExecParams}" : parallelExecParameters
 
-  //       // sequentialExecParameters = sequentialExecParameters?.trim() ?
-  //       //   "${sequentialExecParameters} ${portalExecParams}" : sequentialExecParameters
+  //       sequentialExecParameters = sequentialExecParameters?.trim() ?
+  //         "${sequentialExecParameters} ${portalExecParams}" : sequentialExecParameters
   //     } catch (Exception e) {
   //       println("Error: " + e.getMessage())
   //     }
@@ -98,10 +100,8 @@ void call(params) {
             }
             int maxWorkers = Math.min(numberOfWorkers, workersLimit) // Ensuring not more than limited workers number
             List<List<Integer>> batches = (1..maxWorkers).toList().collate(batchSize)
-            def testQueue = ['Volaris','Vega','Thunderjet','Spitfire','Folijet','Firebird','Corsair']
-            // Shared state to track worker status
-            def workerStatus = [failFast: false]
-            println(" ######### BATCHES " + batches)
+            List<String> cypressTags = ["volaris+standalone vega+standalone", "thunderjet+standalone spitfire+standalone", "folijet+standalone", "firebird+standalone corsair+standalone"]
+
             setupCommonEnvironmentVariables(tenantUrl, okapiUrl, tenantId, adminUsername, adminPassword)
 
             // Divide workers into batches
@@ -109,19 +109,19 @@ void call(params) {
             batches.eachWithIndex { batch, batchIndex ->
               batchExecutions["Batch#${batchIndex + 1}"] = {
                 node(agent) {
-                  println(" ========>>  " + batch + " " + agent)
                   cleanWs notFailBuild: true
 
                   dir("cypress-${batch[0]}") {
                     cloneCypressRepo(branch)
                     cypressImageVersion = readPackageJsonDependencyVersion('./package.json', 'cypress')
-                    println(" ----- ----- Compiling test for cypress-${batch[0]}")
+
                     compileTests(cypressImageVersion, "${batch[0]}")
+
+                    tuneWorkspaceForRP()
                   }
 
                   batch.eachWithIndex { copyBatch, copyBatchIndex ->
                     if (copyBatchIndex > 0) {
-                      println(" ~~~~~~~~~~~>>  " + copyBatch)
                       sh "mkdir -p cypress-${copyBatch}"
                       sh "cp -r cypress-${batch[0]}/. cypress-${copyBatch}"
                     }
@@ -129,48 +129,17 @@ void call(params) {
 
                   Map<String, Closure> parallelWorkers = [failFast: false]
                   batch.each { workerNumber ->
-                    if (!testQueue.isEmpty()) {
-                      parallelWorkers["Worker#${workerNumber}"] = {
-                        def testToExecute = testQueue.pop()
-                        println(" || " + testToExecute)
-                        dir("cypress-${workerNumber}") {
-                          executeTests(cypressImageVersion, "parallel_${customBuildName}"
-                            , browserName, parallelExecParameters
-                            , testrailProjectID, testrailRunID, workerNumber.toString(), testToExecute, workerStatus)
-                        }
+                    def tagString = cypressTags.pop()
+                    parallelWorkers["Worker#${workerNumber}"] = {
+                      dir("cypress-${workerNumber}") {
+                        executeTests(cypressImageVersion, "parallel_${customBuildName}"
+                          , browserName, parallelExecParameters
+                          , testrailProjectID, testrailRunID, workerNumber.toString(), tagString)
                       }
                     }
                   }
                   parallel(parallelWorkers)
-                  // Monitor and execute remaining tasks
-                  while (!testQueue.isEmpty()) {
-                    waitUntil {
-                      // Check if any worker is free
-                      def freeWorker = false
-                      batch.each { workerNumber ->
-                        def workerName = workerNumber.toString()
-                        if (!workerStatus[workerName]) {
-                          if (!testQueue.isEmpty()) {
-                            parallelWorkers["Worker#${workerNumber}"] = {
-                              def testToExecute = testQueue.pop()
-                              println(" ||| " + testToExecute)
-                              dir("cypress-${workerNumber}") {
-                                executeTests(cypressImageVersion, "parallel_${customBuildName}"
-                                  , browserName, parallelExecParameters
-                                  , testrailProjectID, testrailRunID, workerNumber.toString(), testToExecute, workerStatus)
-                              }
-                            }
-                            freeWorker = true
-                          }
-                        }
-                      }
-                        return freeWorker
-                    }
-                    // Execute remaining tasks in parallel
-                    parallel(parallelWorkers)
-                  }
 
-                  ////////////////////////////////////////////////
                   batch.each { workerNumber ->
                     dir("cypress-${workerNumber}") {
                       resultPaths.add(archiveTestResults("${workerNumber}"))
@@ -183,11 +152,36 @@ void call(params) {
           }
         }
       }
+      // if (sequentialExecParameters?.trim()) {
+      //   stage('[Cypress] Sequential run') {
+      //     script {
+      //       cloneCypressRepo(branch)
+      //       cypressImageVersion = readPackageJsonDependencyVersion('./package.json', 'cypress')
+
+      //       compileTests(cypressImageVersion)
+
+      //       executeTests(cypressImageVersion, "sequential_${customBuildName}", browserName
+      //         , sequentialExecParameters, testrailProjectID, testrailRunID)
+
+      //       resultPaths.add(archiveTestResults((numberOfWorkers + 1).toString()))
+      //     }
+      //   }
+      // }
     }
   } catch (e) {
     println(e)
     error("Tests execution stage failed")
   } finally {
+    // if (useReportPortal) {
+    //   stage("[ReportPortal Run stop]") {
+    //     try {
+    //       def res_end = reportPortal.launchFinish()
+    //       println("${res_end}")
+    //     } catch (Exception e) {
+    //       println("Couldn't stop run in ReportPortal\nError: ${e.getMessage()}")
+    //     }
+    //   }
+    // }
     stage('[Allure] Generate report') {
       script {
         for (path in resultPaths) {
@@ -211,6 +205,32 @@ void call(params) {
         ])
       }
     }
+
+    // stage('[Allure] Send slack notifications') {
+    //   script {
+    //     def parseAllureReport = readJSON(file: "${WORKSPACE}/allure-report/data/suites.json")
+
+    //     Map<String, Integer> statusCounts = [failed: 0, passed: 0, broken: 0]
+    //     parseAllureReport.children.each { child ->
+    //       child.children.each { testCase ->
+    //         def status = testCase.status
+    //         if (statusCounts[status] != null) {
+    //           statusCounts[status] += 1
+    //         }
+    //       }
+    //     }
+
+    //     slackSend(attachments: folioSlackNotificationUtils
+    //       .renderBuildAndTestResultMessage_OLD(
+    //         TestType.CYPRESS
+    //         , statusCounts
+    //         , customBuildName
+    //         , useReportPortal
+    //         , "${env.BUILD_URL}allure/"
+    //       )
+    //       , channel: "#rancher_tests_notifications")
+    //   }
+    // }
   }
 }
 
@@ -250,35 +270,26 @@ void compileTests(String cypressImageVersion, String batchID = '') {
         node -v; yarn -v
         yarn config set @folio:registry ${Constants.FOLIO_NPM_REPO_URL}
         env; yarn install
-        yarn add -D cypress-testrail-simple@${readPackageJsonDependencyVersion('./package.json', 'cypress-testrail-simple')}"""
-//      yarn global add cypress-cloud@${readPackageJsonDependencyVersion('./package.json', 'cypress-cloud')}
+        yarn add -D cypress-testrail-simple@${readPackageJsonDependencyVersion('./package.json', 'cypress-testrail-simple')}
+        yarn global add cypress-cloud@${readPackageJsonDependencyVersion('./package.json', 'cypress-cloud')}"""
 //      sh "yarn add @reportportal/agent-js-cypress@latest"
     })
   }
 }
 
 void executeTests(String cypressImageVersion, String customBuildName, String browserName, String execParameters,
-                  String testrailProjectID = '', String testrailRunID = '', String workerId = '', String testGroupName, Map status) {
+                  String testrailProjectID = '', String testrailRunID = '', String workerId = '', String tagString) {
   stage('Run tests') {
-    status[workerId] = true
     String runId = workerId?.trim() ? "${env.BUILD_ID}${workerId}" : env.BUILD_ID
     runId = runId.length() > 2 ? runId : "0${runId}"
-    String execString = ''' 
-      echo "<><><>"
-      echo "$$"
-      pwd
-      cat /etc/machine-id
-      echo "<><><>" 
-    '''
-    // String execString = """
-    //   export HOME=\$(pwd); export CYPRESS_CACHE_FOLDER=\$(pwd)/cache
-    //   export DISPLAY=:${runId[-2..-1]}
-    //   mkdir -p /tmp/.X11-unix
-    //   Xvfb \$DISPLAY -screen 0 1920x1080x24 &
-    //   env; npx cypress run --browser ${browserName} ${execParameters}
-    //   pkill Xvfb
-    // """
-//    String execString = "npx cypress-cloud run --parallel --record --browser ${browserName} --ci-build-id ${customBuildName} ${execParameters}"
+    String execString = """
+      export HOME=\$(pwd); export CYPRESS_CACHE_FOLDER=\$(pwd)/cache
+      export DISPLAY=:${runId[-2..-1]}
+      mkdir -p /tmp/.X11-unix
+      Xvfb \$DISPLAY -screen 0 1920x1080x24 &
+      env; npx cypress run --browser ${browserName} --env grepTags='${tagString}'
+      pkill Xvfb
+    """
 
     runInDocker(cypressImageVersion, "worker-${runId}", {
       if (testrailProjectID?.trim() && testrailRunID?.trim()) {
@@ -294,11 +305,9 @@ void executeTests(String cypressImageVersion, String customBuildName, String bro
           sh execString
         }
       } else {
-        println(" ---------- Start test exec >>  " + workerId)
         sh execString
       }
     })
-    status[workerId] = false
   }
 }
 
@@ -340,4 +349,16 @@ void runInDocker(String cypressImageVersion, String containerNameSuffix, Closure
       containerObject.stop()
     }
   }
+}
+
+//TODO: Temporary solution. Should be refactored via RANCHER-1528 and RANCHER-1529 tickets
+@Deprecated
+void tuneWorkspaceForRP(){
+  String cypressReporter = "@reportportal/agent-js-cypress/lib/cypressReporter.js"
+  String report_portal_client = "@reportportal/client-javascript/lib/report-portal-client.js"
+  String config = "@reportportal/client-javascript/lib/commons/config.js"
+
+  writeFile file: "./node_modules/${cypressReporter}", text: libraryResource("reportportal/${cypressReporter}")
+  writeFile file: "./node_modules/${report_portal_client}", text: libraryResource("reportportal/${report_portal_client}")
+  writeFile file: "./node_modules/${config}", text: libraryResource("reportportal/${config}")
 }
