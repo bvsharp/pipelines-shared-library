@@ -259,7 +259,7 @@ void compileTests(String cypressImageVersion, String batchID = '') {
 void executeTests(String cypressImageVersion, String customBuildName, String browserName, String execParameters,
                   String testrailProjectID = '', String testrailRunID = '', String workerId = '', String testGroupName, Map status) {
   stage('Run tests') {
-    workerStatus[workerId] = true
+    status[workerId] = true
     String runId = workerId?.trim() ? "${env.BUILD_ID}${workerId}" : env.BUILD_ID
     runId = runId.length() > 2 ? runId : "0${runId}"
     String execString = ''' 
@@ -298,7 +298,7 @@ void executeTests(String cypressImageVersion, String customBuildName, String bro
         sh execString
       }
     })
-    workerStatus[workerId] = false
+    status[workerId] = false
   }
 }
 
