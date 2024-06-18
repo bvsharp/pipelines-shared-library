@@ -153,6 +153,7 @@ void call(params) {
                           if (!testQueue.isEmpty()) {
                             parallelWorkers["Worker#${workerNumber}"] = {
                               def testToExecute = testQueue.pop()
+                              println(" ||| " + testToExecute)
                               dir("cypress-${workerNumber}") {
                                 executeTests(cypressImageVersion, "parallel_${customBuildName}"
                                   , browserName, parallelExecParameters
@@ -263,12 +264,11 @@ void executeTests(String cypressImageVersion, String customBuildName, String bro
     String runId = workerId?.trim() ? "${env.BUILD_ID}${workerId}" : env.BUILD_ID
     runId = runId.length() > 2 ? runId : "0${runId}"
     String execString = ''' 
-      echo "<><><><><><><>"
-      echo "${testGroupName}"
-      echo ( $$ )
+      echo "<><><>"
+      echo "$$"
       pwd
       cat /etc/machine-id
-      echo "<><><><><><><>" 
+      echo "<><><>" 
     '''
     // String execString = """
     //   export HOME=\$(pwd); export CYPRESS_CACHE_FOLDER=\$(pwd)/cache
