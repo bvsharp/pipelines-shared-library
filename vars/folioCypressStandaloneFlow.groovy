@@ -116,8 +116,6 @@ void call(params) {
                     cypressImageVersion = readPackageJsonDependencyVersion('./package.json', 'cypress')
 
                     compileTests(cypressImageVersion, "${batch[0]}")
-
-                    tuneWorkspaceForRP()
                   }
 
                   batch.eachWithIndex { copyBatch, copyBatchIndex ->
