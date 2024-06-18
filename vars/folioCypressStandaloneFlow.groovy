@@ -150,7 +150,7 @@ void call(params) {
                       batch.each { workerNumber ->
                         def workerName = workerNumber.toString()
                         if (!workerStatus[workerName]) {
-                          if (!taskQueue.isEmpty()) {
+                          if (!testQueue.isEmpty()) {
                             parallelWorkers["Worker#${workerNumber}"] = {
                               def testToExecute = testQueue.pop()
                               dir("cypress-${workerNumber}") {
