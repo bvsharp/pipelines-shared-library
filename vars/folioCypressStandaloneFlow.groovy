@@ -100,7 +100,7 @@ void call(params) {
             }
             int maxWorkers = Math.min(numberOfWorkers, workersLimit) // Ensuring not more than limited workers number
             List<List<Integer>> batches = (1..maxWorkers).toList().collate(batchSize)
-            List<String> cypressTags = ["volaris+standalone vega+standalone", "thunderjet+standalone spitfire+standalone", "folijet+standalone", "firebird+standalone corsair+standalone"]
+            List<String> cypressTags = ["volaris+smoke vega+smoke", "thunderjet+smoke spitfire+smoke", "folijet+smoke", "firebird+smoke corsair+smoke"]
 
             setupCommonEnvironmentVariables(tenantUrl, okapiUrl, tenantId, adminUsername, adminPassword)
 
