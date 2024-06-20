@@ -11,9 +11,9 @@ import org.folio.utilities.Logger
 import org.folio.utilities.Tools
 import org.jenkinsci.plugins.workflow.libs.Library
 
-@Library('pipelines-shared-library') _
+@Library('pipelines-shared-library@RANCHER-1526') _
 
-CONFIG_BRANCH = 'master'
+CONFIG_BRANCH = 'RANCHER-1526'
 
 properties([buildDiscarder(logRotator(numToKeepStr: '30')),
             disableConcurrentBuilds(),
@@ -117,10 +117,10 @@ ansiColor('xterm') {
       }
 
       stage('[DB and Indices] Restore') {
-        folioPrint.colored("Restoring indices...", "green")
-        withCredentials([usernamePassword(credentialsId: 'elastic', passwordVariable: 'es_password', usernameVariable: 'es_username')]) {
-          folioEcsIndices.prepareEcsIndices("${env.es_username}", "${env.es_password}")
-        }
+//        folioPrint.colored("Restoring indices...", "green")
+//        withCredentials([usernamePassword(credentialsId: 'elastic', passwordVariable: 'es_password', usernameVariable: 'es_username')]) {
+//          folioEcsIndices.prepareEcsIndices("${env.es_username}", "${env.es_password}")
+//        }
 
         folioHelm.withKubeConfig(params.CLUSTER) {
           folioPrint.colored("Restoring psql ecs dump...\nEstimated duration: ~ 1-2 hours", "green")
@@ -142,64 +142,64 @@ ansiColor('xterm') {
         sleep time: 5, unit: "MINUTES"
       }
 
-      stage('Prepare update') {
-        main.getTenantsList().each {
-          switch (it) {
-            case ['cs00000int', 'cs00000int_0001', 'cs00000int_0002', 'cs00000int_0003', 'cs00000int_0004', 'cs00000int_0005']:
-              namespace.addTenant(new OkapiTenant("${it}")
-                .withAdminUser(new OkapiUser('ecs_admin', 'admin'))
-                .withInstallRequestParams(installRequestParams)
-                .withConfiguration(new OkapiConfig()))
-              break
-          }
-        }
-        Users users = new Users(this, namespace.generateDomain('okapi'))
-        namespace.getModules().setInstallJson(newInstallJson)
-        OkapiUser okapiUser = new OkapiUser('consortia-system-user', sys_psswd)
-        namespace.setEnableConsortia(params.CONSORTIA, false)
-        namespace.tenants.each { name, id ->
-          switch (id.getTenantId()) {
-            case ['cs00000int']:
-              id.getModules().setInstallJson(newInstallJson)
-              break
-            case ['cs00000int_0001', 'cs00000int_0002', 'cs00000int_0003', 'cs00000int_0004', 'cs00000int_0005']:
-              id.getModules().setInstallJson(newInstallJson)
-              id.getModules().removeModule('folio_consortia-settings')
-              break
-            default:
-              println("${id.tenantId} --> leaving blank")
-              break
-          }
-          def user = users.getUserByName(id, okapiUser)
-          okapiUser.setUuid(user.get('id'))
-          users.resetUserPassword(id, okapiUser)
-          println('TenantId: ' + id.getTenantId() + "\nModules to enable:\n" + id.getModules().getInstallJson())
-        }
-        main.publishServiceDiscovery(namespace.getModules().getDiscoveryList())
-        main.publishDescriptors(namespace.getModules().getInstallJson())
-      }
-
-      stage('Update') {
-        folioHelm.withKubeConfig(namespace.getClusterName()) {
-          folioHelm.deployFolioModulesParallel(namespace, namespace.getModules().getBackendModules())
-
-          folioEdge.renderEphemeralProperties(namespace)
-          namespace.getModules().getEdgeModules().each { name, version ->
-            kubectl.deleteConfigMap("${name}-ephemeral-properties", namespace.getNamespaceName())
-            kubectl.createConfigMap("${name}-ephemeral-properties", namespace.getNamespaceName(), "./${name}-ephemeral-properties")
-          }
-
-          folioHelm.deployFolioModulesParallel(namespace, namespace.getModules().getEdgeModules())
-          folioHelm.checkAllPodsRunning(namespace.getNamespaceName())
-        }
-      }
-
-      stage('Enable') {
-        retry(2) {
-          sleep time: 5, unit: 'MINUTES' //mod-agreements, service-interaction etc | federation lock
-          main.update(namespace.getTenants())
-        }
-      }
+//      stage('Prepare update') {
+//        main.getTenantsList().each {
+//          switch (it) {
+//            case ['cs00000int', 'cs00000int_0001', 'cs00000int_0002', 'cs00000int_0003', 'cs00000int_0004', 'cs00000int_0005']:
+//              namespace.addTenant(new OkapiTenant("${it}")
+//                .withAdminUser(new OkapiUser('ecs_admin', 'admin'))
+//                .withInstallRequestParams(installRequestParams)
+//                .withConfiguration(new OkapiConfig()))
+//              break
+//          }
+//        }
+//        Users users = new Users(this, namespace.generateDomain('okapi'))
+//        namespace.getModules().setInstallJson(newInstallJson)
+//        OkapiUser okapiUser = new OkapiUser('consortia-system-user', sys_psswd)
+//        namespace.setEnableConsortia(params.CONSORTIA, false)
+//        namespace.tenants.each { name, id ->
+//          switch (id.getTenantId()) {
+//            case ['cs00000int']:
+//              id.getModules().setInstallJson(newInstallJson)
+//              break
+//            case ['cs00000int_0001', 'cs00000int_0002', 'cs00000int_0003', 'cs00000int_0004', 'cs00000int_0005']:
+//              id.getModules().setInstallJson(newInstallJson)
+//              id.getModules().removeModule('folio_consortia-settings')
+//              break
+//            default:
+//              println("${id.tenantId} --> leaving blank")
+//              break
+//          }
+//          def user = users.getUserByName(id, okapiUser)
+//          okapiUser.setUuid(user.get('id'))
+//          users.resetUserPassword(id, okapiUser)
+//          println('TenantId: ' + id.getTenantId() + "\nModules to enable:\n" + id.getModules().getInstallJson())
+//        }
+//        main.publishServiceDiscovery(namespace.getModules().getDiscoveryList())
+//        main.publishDescriptors(namespace.getModules().getInstallJson())
+//      }
+//
+//      stage('Update') {
+//        folioHelm.withKubeConfig(namespace.getClusterName()) {
+//          folioHelm.deployFolioModulesParallel(namespace, namespace.getModules().getBackendModules())
+//
+//          folioEdge.renderEphemeralProperties(namespace)
+//          namespace.getModules().getEdgeModules().each { name, version ->
+//            kubectl.deleteConfigMap("${name}-ephemeral-properties", namespace.getNamespaceName())
+//            kubectl.createConfigMap("${name}-ephemeral-properties", namespace.getNamespaceName(), "./${name}-ephemeral-properties")
+//          }
+//
+//          folioHelm.deployFolioModulesParallel(namespace, namespace.getModules().getEdgeModules())
+//          folioHelm.checkAllPodsRunning(namespace.getNamespaceName())
+//        }
+//      }
+//
+//      stage('Enable') {
+//        retry(2) {
+//          sleep time: 5, unit: 'MINUTES' //mod-agreements, service-interaction etc | federation lock
+//          main.update(namespace.getTenants())
+//        }
+//      }
 
       stage('Build and deploy UI') {
         namespace.getModules().setInstallJson(newInstallJson)
