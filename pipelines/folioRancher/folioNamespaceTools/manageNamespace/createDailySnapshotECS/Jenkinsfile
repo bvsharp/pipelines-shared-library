@@ -143,21 +143,21 @@ ansiColor('xterm') {
       }
 
       stage('Prepare update') {
-        main.getTenantsList().each {
-          switch (it) {
-            case ['cs00000int', 'cs00000int_0001', 'cs00000int_0002', 'cs00000int_0003', 'cs00000int_0004', 'cs00000int_0005']:
-              namespace.addTenant(new OkapiTenant("${it}")
-                .withAdminUser(new OkapiUser('ecs_admin', 'admin'))
-                .withInstallRequestParams(installRequestParams)
-                .withConfiguration(new OkapiConfig()))
-              break
-          }
-        }
-        Users users = new Users(this, namespace.generateDomain('okapi'))
-        namespace.getModules().setInstallJson(newInstallJson)
-        OkapiUser okapiUser = new OkapiUser('consortia-system-user', sys_psswd)
-        namespace.setEnableConsortia(params.CONSORTIA, false)
-        namespace.tenants.each { name, id ->
+//        main.getTenantsList().each {
+//          switch (it) {
+//            case ['cs00000int', 'cs00000int_0001', 'cs00000int_0002', 'cs00000int_0003', 'cs00000int_0004', 'cs00000int_0005']:
+//              namespace.addTenant(new OkapiTenant("${it}")
+//                .withAdminUser(new OkapiUser('ecs_admin', 'admin'))
+//                .withInstallRequestParams(installRequestParams)
+//                .withConfiguration(new OkapiConfig()))
+//              break
+//          }
+//        }
+//        Users users = new Users(this, namespace.generateDomain('okapi'))
+//        namespace.getModules().setInstallJson(newInstallJson)
+//        OkapiUser okapiUser = new OkapiUser('consortia-system-user', sys_psswd)
+//        namespace.setEnableConsortia(params.CONSORTIA, false)
+//        namespace.tenants.each { name, id ->
 //          switch (id.getTenantId()) {
 //            case ['cs00000int']:
 //              id.getModules().setInstallJson(newInstallJson)
@@ -170,13 +170,13 @@ ansiColor('xterm') {
 //              println("${id.tenantId} --> leaving blank")
 //              break
 //          }
-          def user = users.getUserByName(id, okapiUser)
-          okapiUser.setUuid(user.get('id'))
-          users.resetUserPassword(id, okapiUser)
-          println('TenantId: ' + id.getTenantId() + "\nModules to enable:\n" + id.getModules().getInstallJson())
-        }
-//        main.publishServiceDiscovery(namespace.getModules().getDiscoveryList())
-//        main.publishDescriptors(namespace.getModules().getInstallJson())
+//          def user = users.getUserByName(id, okapiUser)
+//          okapiUser.setUuid(user.get('id'))
+//          users.resetUserPassword(id, okapiUser)
+//          println('TenantId: ' + id.getTenantId() + "\nModules to enable:\n" + id.getModules().getInstallJson())
+//        }
+        main.publishServiceDiscovery(namespace.getModules().getDiscoveryList())
+        main.publishDescriptors(namespace.getModules().getInstallJson())
       }
 //
 //      stage('Update') {
@@ -203,8 +203,8 @@ ansiColor('xterm') {
 
       stage('Build and deploy UI') {
         namespace.getModules().setInstallJson(newInstallJson)
-        String folioBranch = "R1-2023-Consortia"
-        String commitHash = common.getLastCommitHash("platform-complete", "R1-2023-Consortia")
+        String folioBranch = "R2-2023-Consortia"
+        String commitHash = common.getLastCommitHash("platform-complete", "R2-2023-Consortia")
         namespace.setEnableConsortia(true)
 
         TenantUi tenantUi = new TenantUi("${params.CLUSTER}-${params.NAMESPACE}", commitHash, folioBranch)
