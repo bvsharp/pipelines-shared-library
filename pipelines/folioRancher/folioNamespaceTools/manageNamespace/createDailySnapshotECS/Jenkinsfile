@@ -100,17 +100,17 @@ ansiColor('xterm') {
         checkout scm
       }
 
-      stage('[TF] Destroy') {
-        def nsExists
-        folioHelm.withKubeConfig(namespaceBaseParams.getClusterName()) {
-          nsExists = kubectl.checkNamespaceExistence("${namespaceBaseParams.getNamespaceName()}")
-        }
-        if (nsExists) {
-          folioTriggerJob.deleteNamespace(deleteNamespaceJobName, namespaceBaseParams)
-        } else {
-          logger.warning("${namespaceBaseParams.getNamespaceName()} namespace does not exists!")
-        }
-      }
+//      stage('[TF] Destroy') {
+//        def nsExists
+//        folioHelm.withKubeConfig(namespaceBaseParams.getClusterName()) {
+//          nsExists = kubectl.checkNamespaceExistence("${namespaceBaseParams.getNamespaceName()}")
+//        }
+//        if (nsExists) {
+//          folioTriggerJob.deleteNamespace(deleteNamespaceJobName, namespaceBaseParams)
+//        } else {
+//          logger.warning("${namespaceBaseParams.getNamespaceName()} namespace does not exists!")
+//        }
+//      }
 
       stage('[TF] Provision') {
         folioTerraformFlow.manageNamespace('apply', tfConfig)
