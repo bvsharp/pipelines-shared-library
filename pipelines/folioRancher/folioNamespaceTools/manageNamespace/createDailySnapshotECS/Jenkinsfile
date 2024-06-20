@@ -138,8 +138,8 @@ ansiColor('xterm') {
             .jsonParse(awscli.getS3FileContent("${installJsonS3Path}" + "install.json")))
           namespace.setOkapiVersion(common.getOkapiVersion(namespace.getModules().getInstallJson()))
         }
-        folioDeployFlow.restore(namespace)
-        sleep time: 5, unit: "MINUTES"
+//        folioDeployFlow.restore(namespace)
+//        sleep time: 5, unit: "MINUTES"
       }
 
       stage('Prepare update') {
