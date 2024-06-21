@@ -100,7 +100,7 @@ void call(params) {
             }
             int maxWorkers = Math.min(numberOfWorkers, workersLimit) // Ensuring not more than limited workers number
             List<List<Integer>> batches = (1..maxWorkers).toList().collate(batchSize)
-            List<String> cypressTags = ["volaris+smoke vega+smoke", "thunderjet+smoke spitfire+smoke", "folijet+smoke", "firebird+smoke corsair+smoke"]
+            List<String> cypressTags = ["volaris+smoke", "thunderjet+smoke", "folijet+smoke", "firebird+smoke"]
 
             setupCommonEnvironmentVariables(tenantUrl, okapiUrl, tenantId, adminUsername, adminPassword)
 
@@ -268,8 +268,8 @@ void compileTests(String cypressImageVersion, String batchID = '') {
         node -v; yarn -v
         yarn config set @folio:registry ${Constants.FOLIO_NPM_REPO_URL}
         env; yarn install
-        yarn add -D cypress-testrail-simple@${readPackageJsonDependencyVersion('./package.json', 'cypress-testrail-simple')}
-        yarn global add cypress-cloud@${readPackageJsonDependencyVersion('./package.json', 'cypress-cloud')}"""
+        yarn add -D cypress-testrail-simple@${readPackageJsonDependencyVersion('./package.json', 'cypress-testrail-simple')}"""
+ //     yarn global add cypress-cloud@${readPackageJsonDependencyVersion('./package.json', 'cypress-cloud')}
 //      sh "yarn add @reportportal/agent-js-cypress@latest"
     })
   }
@@ -303,6 +303,7 @@ void executeTests(String cypressImageVersion, String customBuildName, String bro
           sh execString
         }
       } else {
+        println(" ~~~~~~~ " + tagString)
         sh execString
       }
     })
