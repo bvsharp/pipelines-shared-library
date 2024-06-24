@@ -87,6 +87,7 @@ void call(params) {
             batches.eachWithIndex { batch, batchIndex ->
               batchExecutions["Batch#${batchIndex + 1}"] = {
                 node(agent) {
+                  options { timestamps() }
                   cleanWs notFailBuild: true
 
                   dir("cypress-${batch[0]}") {
@@ -191,7 +192,10 @@ void executeTests(String cypressImageVersion, String customBuildName, String bro
      String execString = """
       echo ' >>>>> START <<<<<< '
       echo '${tagString}'
-      echo ' >>>>> FINISH <<<<<< '
+      sleep 1 &
+      pid=$!
+      for i in $(seq 1 10); do echo 'Working'; done
+      wait '$pid'
     """
     runInDocker(cypressImageVersion, "worker-${runId}", {
       if (testrailProjectID?.trim() && testrailRunID?.trim()) {
