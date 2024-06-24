@@ -107,13 +107,11 @@ void call(params) {
                   batch.each { workerNumber ->
                     def tagString = cypressTags.pop()
                     parallelWorkers["Worker#${workerNumber}"] = {
-                      stage(tagString) {
                         dir("cypress-${workerNumber}") {
                         executeTests(cypressImageVersion, "parallel_${customBuildName}"
                           , browserName, parallelExecParameters
                           , testrailProjectID, testrailRunID, workerNumber.toString(), tagString)
                         }
-                      }
                     }
                   }
                   parallel(parallelWorkers)
