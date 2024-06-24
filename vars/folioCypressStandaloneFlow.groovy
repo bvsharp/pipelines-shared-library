@@ -56,6 +56,28 @@ void call(params) {
 
   buildName customBuildName
 
+  // if (useReportPortal) {
+  //   stage('[ReportPortal config bind & launch]') {
+  //     try {
+  //       reportPortal = new ReportPortalClient(this, TestType.CYPRESS, customBuildName, env.BUILD_NUMBER, env.WORKSPACE, runType)
+
+  //       rpLaunchID = reportPortal.launch()
+  //       println("${rpLaunchID}")
+
+  //       String portalExecParams = reportPortal.getExecParams()
+  //       println("Report portal execution parameters: ${portalExecParams}")
+
+  //       parallelExecParameters = parallelExecParameters?.trim() ?
+  //         "${parallelExecParameters} ${portalExecParams}" : parallelExecParameters
+
+  //       sequentialExecParameters = sequentialExecParameters?.trim() ?
+  //         "${sequentialExecParameters} ${portalExecParams}" : sequentialExecParameters
+  //     } catch (Exception e) {
+  //       println("Error: " + e.getMessage())
+  //     }
+  //   }
+  // }
+
   try {
     timeout(time: testsTimeout, unit: 'HOURS') {
       if (parallelExecParameters?.trim()) {
@@ -78,7 +100,7 @@ void call(params) {
             }
             int maxWorkers = Math.min(numberOfWorkers, workersLimit) // Ensuring not more than limited workers number
             List<List<Integer>> batches = (1..maxWorkers).toList().collate(batchSize)
-            List<String> cypressTags = ["volaris+smoke", "thunderjet+smoke", "folijet+smoke", "firebird+smoke"]
+            List<String> cypressTags = ["volaris+standalone", "thunderjet+standalone", "folijet+standalone", "spitfire+standalone"]
 
             setupCommonEnvironmentVariables(tenantUrl, okapiUrl, tenantId, adminUsername, adminPassword)
 
@@ -107,14 +129,20 @@ void call(params) {
                   batch.each { workerNumber ->
                     def tagString = cypressTags.pop()
                     parallelWorkers["Worker#${workerNumber}"] = {
-                        dir("cypress-${workerNumber}") {
+                      dir("cypress-${workerNumber}") {
                         executeTests(cypressImageVersion, "parallel_${customBuildName}"
                           , browserName, parallelExecParameters
                           , testrailProjectID, testrailRunID, workerNumber.toString(), tagString)
-                        }
+                      }
                     }
                   }
                   parallel(parallelWorkers)
+
+                  batch.each { workerNumber ->
+                    dir("cypress-${workerNumber}") {
+                      resultPaths.add(archiveTestResults("${workerNumber}"))
+                    }
+                  }
                 }
               }
             }
@@ -122,11 +150,85 @@ void call(params) {
           }
         }
       }
+      // if (sequentialExecParameters?.trim()) {
+      //   stage('[Cypress] Sequential run') {
+      //     script {
+      //       cloneCypressRepo(branch)
+      //       cypressImageVersion = readPackageJsonDependencyVersion('./package.json', 'cypress')
+
+      //       compileTests(cypressImageVersion)
+
+      //       executeTests(cypressImageVersion, "sequential_${customBuildName}", browserName
+      //         , sequentialExecParameters, testrailProjectID, testrailRunID)
+
+      //       resultPaths.add(archiveTestResults((numberOfWorkers + 1).toString()))
+      //     }
+      //   }
+      // }
     }
   } catch (e) {
     println(e)
     error("Tests execution stage failed")
   } finally {
+    // if (useReportPortal) {
+    //   stage("[ReportPortal Run stop]") {
+    //     try {
+    //       def res_end = reportPortal.launchFinish()
+    //       println("${res_end}")
+    //     } catch (Exception e) {
+    //       println("Couldn't stop run in ReportPortal\nError: ${e.getMessage()}")
+    //     }
+    //   }
+    // }
+    stage('[Allure] Generate report') {
+      script {
+        for (path in resultPaths) {
+          unstash name: path
+          unzip zipFile: "${path}.zip", dir: path
+        }
+        def allureHome = tool type: 'allure', name: Constants.CYPRESS_ALLURE_VERSION
+        sh "${allureHome}/bin/allure generate --clean ${resultPaths.collect { path -> "${path}/allure-results" }.join(" ")}"
+      }
+    }
+
+    stage('[Allure] Publish report') {
+      script {
+        allure([
+          includeProperties: false,
+          jdk              : '',
+          commandline      : Constants.CYPRESS_ALLURE_VERSION,
+          properties       : [],
+          reportBuildPolicy: 'ALWAYS',
+          results          : resultPaths.collect { path -> [path: "${path}/allure-results"] }
+        ])
+      }
+    }
+
+    // stage('[Allure] Send slack notifications') {
+    //   script {
+    //     def parseAllureReport = readJSON(file: "${WORKSPACE}/allure-report/data/suites.json")
+
+    //     Map<String, Integer> statusCounts = [failed: 0, passed: 0, broken: 0]
+    //     parseAllureReport.children.each { child ->
+    //       child.children.each { testCase ->
+    //         def status = testCase.status
+    //         if (statusCounts[status] != null) {
+    //           statusCounts[status] += 1
+    //         }
+    //       }
+    //     }
+
+    //     slackSend(attachments: folioSlackNotificationUtils
+    //       .renderBuildAndTestResultMessage_OLD(
+    //         TestType.CYPRESS
+    //         , statusCounts
+    //         , customBuildName
+    //         , useReportPortal
+    //         , "${env.BUILD_URL}allure/"
+    //       )
+    //       , channel: "#rancher_tests_notifications")
+    //   }
+    // }
   }
 }
 
@@ -178,19 +280,13 @@ void executeTests(String cypressImageVersion, String customBuildName, String bro
   stage('Run tests') {
     String runId = workerId?.trim() ? "${env.BUILD_ID}${workerId}" : env.BUILD_ID
     runId = runId.length() > 2 ? runId : "0${runId}"
-    // String execString = """
-    //   export HOME=\$(pwd); export CYPRESS_CACHE_FOLDER=\$(pwd)/cache
-    //   export DISPLAY=:${runId[-2..-1]}
-    //   mkdir -p /tmp/.X11-unix
-    //   Xvfb \$DISPLAY -screen 0 1920x1080x24 &
-    //   env; npx cypress run --browser ${browserName} --env grepTags='${tagString}'
-    //   pkill Xvfb
-    // """
-     String execString = """
-      echo ' >>>>> START <<<<<< '
-      echo '$tagString'
-      sleep 10
-      echo ' >>>>> FINISH <<<<<< '
+    String execString = """
+      export HOME=\$(pwd); export CYPRESS_CACHE_FOLDER=\$(pwd)/cache
+      export DISPLAY=:${runId[-2..-1]}
+      mkdir -p /tmp/.X11-unix
+      Xvfb \$DISPLAY -screen 0 1920x1080x24 &
+      env; npx cypress run --browser ${browserName} --env grepTags='${tagString}'
+      pkill Xvfb
     """
     runInDocker(cypressImageVersion, "worker-${runId}", {
       if (testrailProjectID?.trim() && testrailRunID?.trim()) {
@@ -251,4 +347,27 @@ void runInDocker(String cypressImageVersion, String containerNameSuffix, Closure
       containerObject.stop()
     }
   }
+}
+
+ stage("stash artifacts") {
+     stash name: 'artifacts', useDefaultExcludes: false
+   }
+
+   stage("deploy to multiple environments") {
+    def deployments = [:]
+    environments.each { e ->
+      deployments[e] = {
+        node('slave') { // run the deployment on a 'slave' node
+          // Check if unstash is needed
+          def exists = fileExists '.git'
+          if (!exists) {
+            unstash 'artifacts'
+          }
+          stage(e) {
+            // println e
+         }
+       }
+      }
+    }
+  parallel deployments
 }
