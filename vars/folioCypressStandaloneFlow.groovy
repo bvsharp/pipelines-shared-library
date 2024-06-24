@@ -191,7 +191,7 @@ void executeTests(String cypressImageVersion, String customBuildName, String bro
     // """
      String execString = """
       echo ' >>>>> START <<<<<< '
-      echo '${tagString}'
+      echo '$tagString'
       sleep 1 &
       pid=$!
       for i in $(seq 1 10); do echo 'Working'; done
