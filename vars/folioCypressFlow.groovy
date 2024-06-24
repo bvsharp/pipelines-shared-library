@@ -106,63 +106,18 @@ void call(params) {
             int maxWorkers = Math.min(numberOfWorkers, workersLimit) // Ensuring not more than limited workers number
             List<List<Integer>> batches = (1..maxWorkers).toList().collate(batchSize)
 
-            setupCommonEnvironmentVariables(tenantUrl, okapiUrl, tenantId, adminUsername, adminPassword)
-
-            // Divide workers into batches
-            Map<String, Closure> batchExecutions = [failFast: false]
-            batches.eachWithIndex { batch, batchIndex ->
-              batchExecutions["Batch#${batchIndex + 1}"] = {
-                node(agent) {
-                  cleanWs notFailBuild: true
-
-                  SmtpConfig smtp
-                  withCredentials([[$class           : 'AmazonWebServicesCredentialsBinding',
-                                    credentialsId    : Constants.EMAIL_SMTP_CREDENTIALS_ID,
-                                    accessKeyVariable: 'EMAIL_USERNAME',
-                                    secretKeyVariable: 'EMAIL_PASSWORD'],
-                                   string(credentialsId: Constants.EBSCO_KB_CREDENTIALS_ID, variable: 'KB_API_KEY')]) {
-                    smtp = new SmtpConfig(Constants.EMAIL_SMTP_SERVER, Constants.EMAIL_SMTP_PORT, EMAIL_USERNAME, EMAIL_PASSWORD, Constants.EMAIL_FROM)
-                  }
-
-                  println("SES SMTP: username=${smtp.username} pwd=${smtp.password} host=${smtp.host} port=${smtp.port} from=${smtp.from}")
-
-                  dir("cypress-${batch[0]}") {
-                    cloneCypressRepo(branch)
-                    cypressImageVersion = readPackageJsonDependencyVersion('./package.json', 'cypress')
-
-                    compileTests(cypressImageVersion, "${batch[0]}")
-                  }
-
-                  batch.eachWithIndex { copyBatch, copyBatchIndex ->
-                    if (copyBatchIndex > 0) {
-                      sh "mkdir -p cypress-${copyBatch}"
-                      sh "cp -r cypress-${batch[0]}/. cypress-${copyBatch}"
-                    }
-                  }
-
-                  sleep time: 1, unit: 'MINUTES'
-
-                  Map<String, Closure> parallelWorkers = [failFast: false]
-                  batch.each { workerNumber ->
-                    parallelWorkers["Worker#${workerNumber}"] = {
-                      dir("cypress-${workerNumber}") {
-                        executeTests(cypressImageVersion, "parallel_${customBuildName}"
-                          , browserName, parallelExecParameters
-                          , testrailProjectID, testrailRunID, workerNumber.toString())
-                      }
-                    }
-                  }
-                  parallel(parallelWorkers)
-
-                  batch.each { workerNumber ->
-                    dir("cypress-${workerNumber}") {
-                      resultPaths.add(archiveTestResults("${workerNumber}"))
-                    }
-                  }
-                }
-              }
+            SmtpConfig smtp
+            withCredentials([[$class           : 'AmazonWebServicesCredentialsBinding',
+                              credentialsId    : Constants.EMAIL_SMTP_CREDENTIALS_ID,
+                              accessKeyVariable: 'EMAIL_USERNAME',
+                              secretKeyVariable: 'EMAIL_PASSWORD'],
+                             string(credentialsId: Constants.EBSCO_KB_CREDENTIALS_ID, variable: 'KB_API_KEY')]) {
+              smtp = new SmtpConfig(Constants.EMAIL_SMTP_SERVER, Constants.EMAIL_SMTP_PORT, EMAIL_USERNAME, EMAIL_PASSWORD, Constants.EMAIL_FROM)
             }
-            parallel(batchExecutions)
+
+            println("SES SMTP: username=${smtp.username} pwd=${smtp.password} host=${smtp.host} port=${smtp.port} from=${smtp.from}")
+
+            setupCommonEnvironmentVariables(tenantUrl, okapiUrl, tenantId, adminUsername, adminPassword)
           }
         }
       }
