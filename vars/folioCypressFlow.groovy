@@ -115,14 +115,16 @@ void call(params) {
                 node(agent) {
                   cleanWs notFailBuild: true
 
+                  SmtpConfig smtp
                   withCredentials([[$class           : 'AmazonWebServicesCredentialsBinding',
                                     credentialsId    : Constants.EMAIL_SMTP_CREDENTIALS_ID,
                                     accessKeyVariable: 'EMAIL_USERNAME',
                                     secretKeyVariable: 'EMAIL_PASSWORD'],
                                    string(credentialsId: Constants.EBSCO_KB_CREDENTIALS_ID, variable: 'KB_API_KEY')]) {
                     smtp = new SmtpConfig(Constants.EMAIL_SMTP_SERVER, Constants.EMAIL_SMTP_PORT, EMAIL_USERNAME, EMAIL_PASSWORD, Constants.EMAIL_FROM)
-                    println("SES SMTP: username=${smtp.username} pwd=${smtp.password} host=${smtp.host} port=${smtp.port} from=${smtp.from}")
                   }
+
+                  println("SES SMTP: username=${smtp.username} pwd=${smtp.password} host=${smtp.host} port=${smtp.port} from=${smtp.from}")
 
                   dir("cypress-${batch[0]}") {
                     cloneCypressRepo(branch)
