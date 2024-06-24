@@ -192,10 +192,8 @@ void executeTests(String cypressImageVersion, String customBuildName, String bro
      String execString = """
       echo ' >>>>> START <<<<<< '
       echo '$tagString'
-      sleep 1 &
-      pid='$!'
-      for i in $(seq 1 10); do echo 'Working'; done
-      wait '$pid'
+      sleep 10
+      echo ' >>>>> FINISH <<<<<< '
     """
     runInDocker(cypressImageVersion, "worker-${runId}", {
       if (testrailProjectID?.trim() && testrailRunID?.trim()) {
