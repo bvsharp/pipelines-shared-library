@@ -115,12 +115,14 @@ void call(params) {
                 node(agent) {
                   cleanWs notFailBuild: true
 
-                  withCredentials([$class           : 'AmazonWebServicesCredentialsBinding',
-                                   credentialsId    : Constants.EMAIL_SMTP_CREDENTIALS_ID,
-                                   accessKeyVariable: 'EMAIL_USERNAME',
-                                   secretKeyVariable: 'EMAIL_PASSWORD']) {
+                  withCredentials([[$class           : 'AmazonWebServicesCredentialsBinding',
+                                    credentialsId    : Constants.EMAIL_SMTP_CREDENTIALS_ID,
+                                    accessKeyVariable: 'EMAIL_USERNAME',
+                                    secretKeyVariable: 'EMAIL_PASSWORD'],
+                                   string(credentialsId: Constants.EBSCO_KB_CREDENTIALS_ID, variable: 'KB_API_KEY')]) {
                     smtp = new SmtpConfig(Constants.EMAIL_SMTP_SERVER, Constants.EMAIL_SMTP_PORT, EMAIL_USERNAME, EMAIL_PASSWORD, Constants.EMAIL_FROM)
-                    println(smtp)
+                    println("SES SMTP: ${smtp}")
+                    println("SES KB_API_KEY: ${KB_API_KEY}")
                   }
 
                   dir("cypress-${batch[0]}") {
