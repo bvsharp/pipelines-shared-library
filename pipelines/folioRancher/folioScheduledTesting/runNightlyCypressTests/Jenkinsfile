@@ -75,7 +75,7 @@ Map cypressFlowParameters = [
 //  testrailProjectID     : '14',
 //  testrailRunID         : '2108',
   numberOfWorkers       : '12',
-  agent                 : 'cypress',
+  agent                 : 'cypress-static',
   runType               : 'night',
   useReportPortal       : 'true'
 ]
