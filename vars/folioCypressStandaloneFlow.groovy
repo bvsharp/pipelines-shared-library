@@ -107,7 +107,7 @@ void call(params) {
                   batch.each { workerNumber ->
                     def tagString = cypressTags.pop()
                     parallelWorkers["Worker#${workerNumber}"] = {
-                      stage(tagString) {
+                      node(agent) {
                         dir("cypress-${workerNumber}") {
                         executeTests(cypressImageVersion, "parallel_${customBuildName}"
                           , browserName, parallelExecParameters
@@ -189,10 +189,9 @@ void executeTests(String cypressImageVersion, String customBuildName, String bro
     //   pkill Xvfb
     // """
      String execString = """
-      sleep 1 &
-      pid=$!
-      for i in $(seq 1 20); do echo '${tagString}'; done
-      wait '$pid'
+      echo ' >>>>> START <<<<<< '
+      echo '${tagString}'
+      echo ' >>>>> FINISH <<<<<< '
     """
     runInDocker(cypressImageVersion, "worker-${runId}", {
       if (testrailProjectID?.trim() && testrailRunID?.trim()) {
