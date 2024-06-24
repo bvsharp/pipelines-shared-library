@@ -1,5 +1,6 @@
 import org.folio.Constants
 import org.folio.client.reportportal.ReportPortalClient
+import org.folio.models.SmtpConfig
 import org.folio.testing.TestType
 
 /**
@@ -113,6 +114,14 @@ void call(params) {
               batchExecutions["Batch#${batchIndex + 1}"] = {
                 node(agent) {
                   cleanWs notFailBuild: true
+
+                  withCredentials([$class           : 'AmazonWebServicesCredentialsBinding',
+                                   credentialsId    : Constants.EMAIL_SMTP_CREDENTIALS_ID,
+                                   accessKeyVariable: 'EMAIL_USERNAME',
+                                   secretKeyVariable: 'EMAIL_PASSWORD']) {
+                    smtp = new SmtpConfig(Constants.EMAIL_SMTP_SERVER, Constants.EMAIL_SMTP_PORT, EMAIL_USERNAME, EMAIL_PASSWORD, Constants.EMAIL_FROM)
+                    println(smtp)
+                  }
 
                   dir("cypress-${batch[0]}") {
                     cloneCypressRepo(branch)
