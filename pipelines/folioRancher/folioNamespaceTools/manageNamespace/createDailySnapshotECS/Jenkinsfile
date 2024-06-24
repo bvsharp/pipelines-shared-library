@@ -112,9 +112,9 @@ ansiColor('xterm') {
 //        }
 //      }
 
-//      stage('[TF] Provision') {
-//        folioTerraformFlow.manageNamespace('apply', tfConfig)
-//      }
+      stage('[TF] Provision') {
+        folioTerraformFlow.manageNamespace('apply', tfConfig)
+      }
 
       stage('[DB and Indices] Restore') {
 //        folioPrint.colored("Restoring indices...", "green")
@@ -124,9 +124,9 @@ ansiColor('xterm') {
 
         folioHelm.withKubeConfig(params.CLUSTER) {
           folioPrint.colored("Restoring psql ecs dump...\nEstimated duration: ~ 1-2 hours", "green")
-//          psqlDumpMethods.restoreHelmData("psql-restore", "psql-dump", "1.0.6", "ecs-snapshot-users",
-//            "ecs-snapshot-01", Constants.PSQL_DUMP_BACKUPS_BUCKET_NAME,
-//            "ecs-snapshot", "${params.NAMESPACE}")
+          psqlDumpMethods.restoreHelmData("psql-restore", "psql-dump", "1.0.6", "ecs-snapshot-users",
+            "ecs-snapshot-01", Constants.PSQL_DUMP_BACKUPS_BUCKET_NAME,
+            "ecs-snapshot", "${params.NAMESPACE}")
           sys_psswd = kubectl.getSecretValue(namespace.getNamespaceName(), 'mod-consortia-systemuser', 'SYSTEM_USER_PASSWORD')
           kubectl.patchSecret("mod-consortia-systemuser", "SYSTEM_USER_NAME", "consortia-system-user", "${namespace.getNamespaceName()}")
         }
@@ -138,7 +138,7 @@ ansiColor('xterm') {
             .jsonParse(awscli.getS3FileContent("${installJsonS3Path}" + "install.json")))
           namespace.setOkapiVersion(common.getOkapiVersion(namespace.getModules().getInstallJson()))
         }
-//        folioDeployFlow.restore(namespace)
+        folioDeployFlow.restore(namespace)
 //        sleep time: 5, unit: "MINUTES"
       }
 
