@@ -87,7 +87,6 @@ void call(params) {
             batches.eachWithIndex { batch, batchIndex ->
               batchExecutions["Batch#${batchIndex + 1}"] = {
                 node(agent) {
-                  options { timestamps() }
                   cleanWs notFailBuild: true
 
                   dir("cypress-${batch[0]}") {
