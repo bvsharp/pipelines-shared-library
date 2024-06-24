@@ -72,8 +72,8 @@ Map cypressFlowParameters = [
   parallelExecParameters: '--env grepTags="smoke criticalPath"',
 //  sequentialExecParameters: '--env grepTags="smoke+nonParallel criticalPath+nonParallel"',
   testsTimeout          : '8',
-  testrailProjectID     : '14',
-  testrailRunID         : '2108',
+//  testrailProjectID     : '14',
+//  testrailRunID         : '2108',
   numberOfWorkers       : '12',
   agent                 : 'cypress',
   runType               : 'night',
@@ -91,29 +91,29 @@ ansiColor('xterm') {
         cleanWs()
       }
 
-      stage('[Job] Destroy environment') {
-        def nsExists
-        folioHelm.withKubeConfig(namespaceBaseParams.getClusterName()) {
-          nsExists = kubectl.checkNamespaceExistence("${namespaceBaseParams.getNamespaceName()}")
-        }
-        if (nsExists) {
-          retry(2) {
-            folioTriggerJob.deleteNamespace(deleteNamespaceJobName, namespaceBaseParams)
-          }
-        } else {
-          logger.warning("${namespaceBaseParams.getNamespaceName()} namespace does not exists!")
-        }
-      }
-
-      stage('[Job] Provision environment') {
-        try {
-          folioTriggerJob.createNamespaceFromBranch(createNamespaceJobName, namespaceFromBranchParams)
-        } catch (Exception new_ex) {
-          slackSend(attachments: folioSlackNotificationUtils.renderFailedBuildResultMessage()
-            , channel: "#rancher_tests_notifications")
-          throw new Exception("Provision of the environment is failed: " + new_ex)
-        }
-      }
+//      stage('[Job] Destroy environment') {
+//        def nsExists
+//        folioHelm.withKubeConfig(namespaceBaseParams.getClusterName()) {
+//          nsExists = kubectl.checkNamespaceExistence("${namespaceBaseParams.getNamespaceName()}")
+//        }
+//        if (nsExists) {
+//          retry(2) {
+//            folioTriggerJob.deleteNamespace(deleteNamespaceJobName, namespaceBaseParams)
+//          }
+//        } else {
+//          logger.warning("${namespaceBaseParams.getNamespaceName()} namespace does not exists!")
+//        }
+//      }
+//
+//      stage('[Job] Provision environment') {
+//        try {
+//          folioTriggerJob.createNamespaceFromBranch(createNamespaceJobName, namespaceFromBranchParams)
+//        } catch (Exception new_ex) {
+//          slackSend(attachments: folioSlackNotificationUtils.renderFailedBuildResultMessage()
+//            , channel: "#rancher_tests_notifications")
+//          throw new Exception("Provision of the environment is failed: " + new_ex)
+//        }
+//      }
 
       stage('[Flow] Execute tests') {
         folioCypressFlow(cypressFlowParameters)

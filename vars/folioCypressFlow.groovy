@@ -128,6 +128,8 @@ void call(params) {
                     }
                   }
 
+                  sleep time: 1, unit: 'MINUTES'
+
                   Map<String, Closure> parallelWorkers = [failFast: false]
                   batch.each { workerNumber ->
                     parallelWorkers["Worker#${workerNumber}"] = {
